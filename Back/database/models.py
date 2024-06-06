@@ -38,7 +38,7 @@ class Guide(models.Model):
 class Like_Dislike(models.Model):
     user_id = models.OneToOneField(User, on_delete = models.CASCADE)
     guide_id = models.OneToOneField(Guide, on_delete= models.CASCADE)
-    status = models.BooleanField(blank = True) # Like:0, Dislike:1
+    status = models.BooleanField(blank = True) # Like:0, Dislike:1, seen:brank
 
     def __str__(self):
         return f'{self.user_id.user_name}:{self.status}'
