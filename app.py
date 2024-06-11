@@ -43,10 +43,6 @@ def save_markers(markers):
     with open('./data/markers.json', 'w', encoding='utf-8') as f:
         json.dump(markers, f, ensure_ascii=False, indent=4)
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
 @app.route('/get_attractions', methods=['GET'])
 def get_attractions():
     attractions = load_attractions()
