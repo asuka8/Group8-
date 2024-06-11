@@ -56,7 +56,7 @@
         <select id="distance">
             <option value="1000">1 km</option>
             <option value="3000">3 km</option>
-            <option value="5000">5 km</option>
+            <option value="5000" selected>5 km</option>
             <option value="10000">10 km</option>
         </select>
         <button onclick="filterAttractions()">Apply Filter</button>
@@ -68,7 +68,9 @@
         var userLocation = null;
         var attractions = [];
         var markers = [];
+        var userMarkers = [];
         var currentAction = {};
+        var currentDistance = 5000;
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -91,8 +93,8 @@
             var marker = L.marker([lat, lng], {icon: icon}).addTo(map);
             marker.bindPopup(`
                 ${name}<br>
-                <button class="btn btn-like" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
-                <button class="btn btn-dislike" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button><br>
+                <button class="btn btn-like ${likes > 0 ? '' : 'btn-inactive'}" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
+                <button class="btn btn-dislike ${dislikes > 0 ? '' : 'btn-inactive'}" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button><br>
                 <textarea id="desc-${lat}-${lng}" placeholder="Add description">${description}</textarea><br>
                 <button class="btn" onclick="addDescription(${lat}, ${lng})">Submit</button>
             `);
@@ -121,13 +123,18 @@
 
         function showAllAttractions() {
             attractions.forEach(attraction => {
-                createMarker(attraction.lat, attraction.lng, attraction.name, "", 0, 0);
+                const userMarker = userMarkers.find(marker => marker.lat === attraction.lat && marker.lng === attraction.lng);
+                if (userMarker) {
+                    createMarker(attraction.lat, attraction.lng, attraction.name, userMarker.description, userMarker.likes, userMarker.dislikes);
+                } else {
+                    createMarker(attraction.lat, attraction.lng, attraction.name, "", 0, 0);
+                }
             });
         }
 
         function filterAttractions() {
-            var distance = document.getElementById('distance').value;
-            distance = parseInt(distance);
+            var distance = parseInt(document.getElementById('distance').value);
+            currentDistance = distance;
             markers.forEach(marker => {
                 map.removeLayer(marker);
             });
@@ -137,7 +144,12 @@
                 attractions.forEach(attraction => {
                     var d = map.distance(userLocation, [attraction.lat, attraction.lng]);
                     if (d <= distance) {
-                        createMarker(attraction.lat, attraction.lng, attraction.name, "", 0, 0);
+                        const userMarker = userMarkers.find(marker => marker.lat === attraction.lat && marker.lng === attraction.lng);
+                        if (userMarker) {
+                            createMarker(attraction.lat, attraction.lng, attraction.name, userMarker.description, userMarker.likes, userMarker.dislikes);
+                        } else {
+                            createMarker(attraction.lat, attraction.lng, attraction.name, "", 0, 0);
+                        }
                     }
                 });
 
@@ -166,7 +178,7 @@
             var desc = document.getElementById(`desc-${lat}-${lng}`).value;
             var action = currentAction.action || null;
             updateMarker(lat, lng, action, desc);
-            currentAction = {};  // 重置当前动作
+            currentAction = {};
         }
 
         function updateMarker(lat, lng, action, description) {
@@ -210,6 +222,8 @@
                 .bindPopup("You are within " + radius + " meters from this point").openPopup();
 
             L.circle(e.latlng, radius).addTo(map);
+
+            filterAttractions();
         }
 
         function onLocationError(e) {
@@ -221,64 +235,37 @@
 
         map.locate({setView: true, maxZoom: 16});
 
-        fetch('/get_attractions')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                attractions = data;
-                console.log('Attractions loaded:', attractions);
-                showAllAttractions();
-            })
-            .catch(error => {
-                console.error('Error fetching attractions:', error);
+        function fetchMarkers() {
+            markers.forEach(marker => {
+                map.removeLayer(marker);
             });
+            markers = [];
 
-            function fetchMarkers() {
-                // Clear existing markers
-                markers.forEach(marker => {
-                    map.removeLayer(marker);
+            fetch('/get_attractions')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    attractions = data;
+                    return fetch('/get_markers');
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    userMarkers = data;
+                    filterAttractions(); 
+                })
+                .catch(error => {
+                    console.error('Error fetching markers or attractions:', error);
                 });
-                markers = [];
-
-                // Load and show attractions from attractions.json
-                fetch('/get_attractions')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        attractions = data;
-                        attractions.forEach(attraction => {
-                            createMarker(attraction.lat, attraction.lng, attraction.name, "", 0, 0);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error fetching attractions:', error);
-                    });
-
-                // Load and show markers from markers.json
-                fetch('/get_markers')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        data.forEach(markerData => {
-                            createMarker(markerData.lat, markerData.lng, markerData.location_name, markerData.description, markerData.likes, markerData.dislikes);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error fetching markers:', error);
-                    });
-            }
+        }
 
         fetchMarkers();
 
@@ -289,15 +276,6 @@
 
             if (locationName) {
                 var description = prompt("Input description:");
-                var marker = L.marker([lat, lng]).addTo(map);
-                marker.bindPopup(`
-                    ${locationName}<br>
-                    <button class="btn btn-like" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
-                    <button class="btn btn-dislike" id="dislike-${lat}, ${lng})">Dislike</button><br>
-                    <textarea id="desc-${lat}-${lng}" placeholder="Add description">${description}</textarea><br>
-                    <button class="btn" onclick="addDescription(${lat}, ${lng})">Submit</button>
-                `).openPopup();
-
                 fetch('/add_marker', {
                     method: 'POST',
                     headers: {
