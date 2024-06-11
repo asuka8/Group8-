@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         #map {
-            height: 100vh;
-            width: 100vw;
+            height: 100vh; /* 设置地图高度为视窗高度 */
+            width: 100vw; /* 设置地图宽度为视窗宽度 */
         }
         #filter {
             position: absolute;
@@ -46,7 +46,7 @@
         textarea {
             width: 100%;
             height: 60px;
-            resize: none;
+            resize: none; /* 禁用调整大小 */
         }
     </style>
 </head>
@@ -63,7 +63,7 @@
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        var map = L.map('map').setView([35.0262444, 135.7808218], 15);
+        var map = L.map('map').setView([35.0262444, 135.7808218], 15); // 默认显示京都
         var userLocation = null;
         var attractions = [];
         var markers = [];
@@ -73,24 +73,24 @@
         }).addTo(map);
 
         function createMarker(lat, lng, name, description, likes, dislikes) {
-            var color = 'blue';
+            var iconUrl = 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'; // 默认颜色蓝色
             if (likes > 0) {
-                color = 'red';
+                iconUrl = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'; // 喜欢时为红色
             } else if (dislikes > 0) {
-                color = 'gray';
+                iconUrl = 'http://maps.google.com/mapfiles/ms/icons/gray-dot.png'; // 不喜欢时为灰色
             }
 
             var icon = new L.Icon({
-                iconUrl: 'https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|' + color,
-                iconSize: [21, 34],
-                iconAnchor: [10, 34],
-                popupAnchor: [0, -30]
+                iconUrl: iconUrl,
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
             });
             var marker = L.marker([lat, lng], {icon: icon}).addTo(map);
             marker.bindPopup(`
                 ${name}<br>
                 <button class="btn btn-like" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
-                <button class="btn btn-dislike" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button><br>
+                <button class="btn btn-dislike" id="dislike-${lat}, ${lng})">Dislike</button><br>
                 <textarea id="desc-${lat}-${lng}" placeholder="Add description">${description}</textarea><br>
                 <button class="btn" onclick="addDescription(${lat}, ${lng})">Submit</button>
             `);
@@ -98,26 +98,26 @@
         }
 
         function updateMarkerColor(lat, lng, likes, dislikes) {
-            var color = 'blue'; 
+            var iconUrl = 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'; // 默认颜色蓝色
             if (likes > 0) {
-                color = 'red';
+                iconUrl = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'; // 喜欢时为红色
             } else if (dislikes > 0) {
-                color = 'gray';
+                iconUrl = 'http://maps.google.com/mapfiles/ms/icons/gray-dot.png'; // 不喜欢时为灰色
             }
 
-            var iconUrl = 'https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|' + color;
             markers.forEach(marker => {
                 if (marker.getLatLng().lat === lat && marker.getLatLng().lng === lng) {
                     marker.setIcon(new L.Icon({
                         iconUrl: iconUrl,
-                        iconSize: [21, 34],
-                        iconAnchor: [10, 34],
-                        popupAnchor: [0, -30]
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32],
+                        popupAnchor: [0, -32]
                     }));
                 }
             });
         }
 
+        // 显示所有景点
         function showAllAttractions() {
             attractions.forEach(attraction => {
                 createMarker(attraction.lat, attraction.lng, attraction.name, "", 0, 0);
@@ -126,7 +126,7 @@
 
         function filterAttractions() {
             var distance = document.getElementById('distance').value;
-            distance = parseInt(distance);
+            distance = parseInt(distance); // 确保是数字类型
             markers.forEach(marker => {
                 map.removeLayer(marker);
             });
@@ -185,7 +185,7 @@
                 if (data.likes !== undefined && data.dislikes !== undefined) {
                     updateMarkerColor(lat, lng, data.likes, data.dislikes);
                 }
-                fetchMarkers();
+                fetchMarkers(); // 重新加载标记
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -211,7 +211,7 @@
 
         map.locate({setView: true, maxZoom: 16});
 
-        fetch('http://localhost:5000/get_attractions')
+        fetch('/get_attractions')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -220,24 +220,38 @@
             })
             .then(data => {
                 attractions = data;
-                console.log('Attractions loaded:', attractions);
-                showAllAttractions();
+                console.log('Attractions loaded:', attractions); // Debugging log
+                showAllAttractions(); // 显示所有景点
             })
             .catch(error => {
                 console.error('Error fetching attractions:', error);
             });
 
         function fetchMarkers() {
-            fetch('http://localhost:5000/get_markers')
-                .then(response => response.json())
+            // Clear existing markers
+            markers.forEach(marker => {
+                map.removeLayer(marker);
+            });
+            markers = [];
+
+            fetch('/get_markers')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     data.forEach(markerData => {
                         createMarker(markerData.lat, markerData.lng, markerData.location_name, markerData.description, markerData.likes, markerData.dislikes);
                     });
+                })
+                .catch(error => {
+                    console.error('Error fetching markers:', error);
                 });
         }
 
-        fetchMarkers();
+        fetchMarkers(); // 页面加载时调用 fetchMarkers
 
         map.on('click', function(e) {
             var lat = e.latlng.lat;
@@ -250,8 +264,8 @@
                 marker.bindPopup(`
                     ${locationName}<br>
                     <button class="btn btn-like" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
-                    <button class="btn btn-dislike" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button><br>
-                    <textarea id="desc-${lat}-${lng}" placeholder="Add description"></textarea><br>
+                    <button class="btn btn-dislike" id="dislike-${lat}, ${lng})">Dislike</button><br>
+                    <textarea id="desc-${lat}-${lng}" placeholder="Add description">${description}</textarea><br>
                     <button class="btn" onclick="addDescription(${lat}, ${lng})">Submit</button>
                 `).openPopup();
 
@@ -270,7 +284,7 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
-                    fetchMarkers();
+                    fetchMarkers(); // 重新加载标记
                 })
                 .catch(error => {
                     console.error('Error:', error);
