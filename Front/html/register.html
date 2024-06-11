@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新規登録ページ</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="register-container">
+        <h1>新規登録</h1>
+        <form id="registerForm" action="register_process.php" method="post">
+            <label for="username">ユーザーID:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">パスワード:</label>
+            <input type="password" id="password" name="password" required>
+            <label for="confirmPassword">パスワード確認:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required>
+            <input type="submit" value="登録">
+        </form>
+        <div class="login-link">
+            <p><a href="index.html">ログイン画面に戻る</a></p>
+        </div>
+    </div>
+    <script src="register.js"></script>
+</body>
+</html>
