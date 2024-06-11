@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map Application</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 100vh; /* 设置地图高度为视窗高度 */
+            width: 100vw; /* 设置地图宽度为视窗宽度 */
+        }
+        #filter {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+        }
+        .btn-like {
+            background-color: red;
+            color: white;
+        }
+        .btn-dislike {
+            background-color: blue;
+            color: white;
+        }
+        .btn-inactive {
+            background-color: gray;
+            color: white;
+        }
+        textarea {
+            width: 100%;
+            height: 60px;
+            resize: none; /* 禁用调整大小 */
+        }
+    </style>
+</head>
+<body>
+    <div id="filter">
+        <label for="distance">Filter by distance:</label>
+        <select id="distance">
+            <option value="1000">1 km</option>
+            <option value="5000">5 km</option>
+            <option value="10000">10 km</option>
+        </select>
+        <button onclick="filterAttractions()">Apply Filter</button>
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([35.0262444, 135.7808218], 15); // 默认显示京都
+        var userLocation = null;
+        var attractions = [];
+        var markers = [];
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        function createMarker(lat, lng, name, description, likes, dislikes) {
+            var color = 'blue'; // 默认颜色蓝色
+            if (likes > 0) {
+                color = 'red'; // 喜欢时为红色
+            } else if (dislikes > 0) {
+                color = 'gray'; // 不喜欢时为灰色
+            }
+
+            var icon = new L.Icon({
+                iconUrl: 'https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|' + color,
+                iconSize: [21, 34],
+                iconAnchor: [10, 34],
+                popupAnchor: [0, -30]
+            });
+            var marker = L.marker([lat, lng], {icon: icon}).addTo(map);
+            marker.bindPopup(`
+                ${name}<br>
+                <button class="btn btn-like" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
+                <button class="btn btn-dislike" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button><br>
+                <textarea id="desc-${lat}-${lng}" placeholder="Add description">${description}</textarea><br>
+                <button class="btn" onclick="addDescription(${lat}, ${lng})">Submit</button>
+            `);
+            markers.push(marker);
+        }
+
+        function updateMarkerColor(lat, lng, likes, dislikes) {
+            var color = 'blue'; // 默认颜色蓝色
+            if (likes > 0) {
+                color = 'red'; // 喜欢时为红色
+            } else if (dislikes > 0) {
+                color = 'gray'; // 不喜欢时为灰色
+            }
+
+            var iconUrl = 'https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|' + color;
+            markers.forEach(marker => {
+                if (marker.getLatLng().lat === lat && marker.getLatLng().lng === lng) {
+                    marker.setIcon(new L.Icon({
+                        iconUrl: iconUrl,
+                        iconSize: [21, 34],
+                        iconAnchor: [10, 34],
+                        popupAnchor: [0, -30]
+                    }));
+                }
+            });
+        }
+
+        // 显示所有景点
+        function showAllAttractions() {
+            attractions.forEach(attraction => {
+                createMarker(attraction.lat, attraction.lng, attraction.name, "", 0, 0);
+            });
+        }
+
+        function filterAttractions() {
+            var distance = document.getElementById('distance').value;
+            distance = parseInt(distance); // 确保是数字类型
+            markers.forEach(marker => {
+                map.removeLayer(marker);
+            });
+            markers = [];
+
+            if (userLocation) {
+                attractions.forEach(attraction => {
+                    var d = map.distance(userLocation, [attraction.lat, attraction.lng]);
+                    if (d <= distance) {
+                        createMarker(attraction.lat, attraction.lng, attraction.name, "", 0, 0);
+                    }
+                });
+
+                userMarkers.forEach(markerData => {
+                    var d = map.distance(userLocation, [markerData.lat, markerData.lng]);
+                    if (d <= distance) {
+                        createMarker(markerData.lat, markerData.lng, markerData.location_name, markerData.description, markerData.likes, markerData.dislikes);
+                    }
+                });
+            }
+        }
+
+        function likeMarker(lat, lng) {
+            updateMarker(lat, lng, 'like');
+            document.getElementById(`like-${lat}-${lng}`).classList.remove('btn-inactive');
+            document.getElementById(`dislike-${lat}-${lng}`).classList.add('btn-inactive');
+        }
+
+        function dislikeMarker(lat, lng) {
+            updateMarker(lat, lng, 'dislike');
+            document.getElementById(`dislike-${lat}-${lng}`).classList.remove('btn-inactive');
+            document.getElementById(`like-${lat}-${lng}`).classList.add('btn-inactive');
+        }
+
+        function addDescription(lat, lng) {
+            var desc = document.getElementById(`desc-${lat}-${lng}`).value;
+            updateMarker(lat, lng, null, desc);
+        }
+
+        function updateMarker(lat, lng, action, description) {
+            fetch('/update_marker', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    lat: lat,
+                    lng: lng,
+                    action: action,
+                    description: description
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.likes !== undefined && data.dislikes !== undefined) {
+                    updateMarkerColor(lat, lng, data.likes, data.dislikes);
+                }
+                fetchMarkers(); // 重新加载标记
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function onLocationFound(e) {
+            userLocation = e.latlng;
+            var radius = e.accuracy / 2;
+
+            L.marker(e.latlng).addTo(map)
+                .bindPopup("You are within " + radius + " meters from this point").openPopup();
+
+            L.circle(e.latlng, radius).addTo(map);
+        }
+
+        function onLocationError(e) {
+            alert(e.message);
+        }
+
+        map.on('locationfound', onLocationFound);
+        map.on('locationerror', onLocationError);
+
+        map.locate({setView: true, maxZoom: 16});
+
+        fetch('http://localhost:5000/get_attractions')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                attractions = data;
+                console.log('Attractions loaded:', attractions); // Debugging log
+                showAllAttractions(); // 显示所有景点
+            })
+            .catch(error => {
+                console.error('Error fetching attractions:', error);
+            });
+
+        function fetchMarkers() {
+            fetch('http://localhost:5000/get_markers')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(markerData => {
+                        createMarker(markerData.lat, markerData.lng, markerData.location_name, markerData.description, markerData.likes, markerData.dislikes);
+                    });
+                });
+        }
+
+        fetchMarkers();
+
+        map.on('click', function(e) {
+            var lat = e.latlng.lat;
+            var lng = e.latlng.lng;
+            var locationName = prompt("Mark a new place:");
+
+            if (locationName) {
+                var description = prompt("Input description:");
+                var marker = L.marker([lat, lng]).addTo(map);
+                marker.bindPopup(`
+                    ${locationName}<br>
+                    <button class="btn btn-like" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
+                    <button class="btn btn-dislike" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button><br>
+                    <textarea id="desc-${lat}-${lng}" placeholder="Add description"></textarea><br>
+                    <button class="btn" onclick="addDescription(${lat}, ${lng})">Submit</button>
+                `).openPopup();
+
+                fetch('/add_marker', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        lat: lat,
+                        lng: lng,
+                        location_name: locationName,
+                        description: description
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    fetchMarkers(); // 重新加载标记
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
