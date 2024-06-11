@@ -1,7 +1,27 @@
 import json
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from config import Config
+from flask_migrate import Migrate
+#from model.models import User
+from sqlalchemy import inspect
+from flask_cors import CORS
 
 app = Flask(__name__)
+app.config.from_object(Config)
+db = SQLAlchemy(app)
+#db.init_app(app)
+migrate = Migrate(app, db)
+#migrate.init_app(app, db)
+CORS(app)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True, nullable=False)
+    password = db.Column(db.String(128), nullable=False)
+
+    def __repr__(self):
+        return f'<User {self.username}>'
 
 @app.route('/')
 def index():
@@ -72,6 +92,69 @@ def update_marker():
 @app.route('/get_markers', methods=['GET'])
 def get_markers():
     return jsonify(user_markers), 200
+
+@app.route('/tables')
+def tables():
+    inspector = inspect(db.engine)
+    tables = inspector.get_table_names()
+    return jsonify(tables)
+
+'''@app.route('/add_user', methods=['POST'])
+def add_user():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+
+    if username is None or password is None:
+        return jsonify({'error': 'Invalid data'}), 400
+
+    if User.query.filter_by(username=username).first() is not None:
+        return jsonify({'error': 'User already exists'}), 400
+
+    new_user = User(username=username, password=password)
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({'message': 'User added successfully!'}), 201'''
+
+@app.route('/add_user_page')
+def add_user_page():
+    return render_template('add_user.html')
+
+@app.route('/add_user', methods=['POST'])
+def add_user():
+    username = request.form['username']
+    password = request.form['password']
+
+    if username is None or password is None:
+        return jsonify({'error': 'Invalid data'}), 400
+
+    if User.query.filter_by(username=username).first() is not None:
+        return jsonify({'error': 'User already exists'}), 400
+
+    new_user = User(username=username, password=password)
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+    return redirect(url_for('get_users'))
+
+
+@app.route('/get_users', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    users_list = [{'id': user.id, 'username': user.username} for user in users]
+    return jsonify(users_list), 200
+
+@app.route('/get_user/<int:id>', methods=['GET'])
+def get_user(id):
+    user = User.query.get(id)
+    if user is None:
+        return jsonify({'error': 'User not found'}), 404
+    return jsonify({'id': user.id, 'username': user.username}), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)
