@@ -61,9 +61,11 @@ def update_marker():
     for marker in user_markers:
         if marker['lat'] == lat and marker['lng'] == lng:
             if action == 'like':
-                marker['likes'] += 1
+                marker['likes'] = 1
+                marker['dislikes'] = 0
             elif action == 'dislike':
-                marker['dislikes'] += 1
+                marker['likes'] = 0
+                marker['dislikes'] = 1
             if description:
                 marker['description'] = description
             save_markers(user_markers)
