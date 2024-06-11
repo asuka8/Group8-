@@ -1,26 +1,194 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>スワイプで移動</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スワイプで画面遷移</title>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+    .container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+    .page {
+      min-width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+    }
+    #profile {
+      background-color: lightblue;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+    #createguide {
+      background-color: lightgreen;
+      width: 100%;
+      height: 100%;
+    }
+    #prefer {
+      background-color: lightcoral;
+      width: 100%;
+      height: 100%;
+    }
+    .hidden {
+      display: none;
+    }
+    .visible {
+      display: block;
+    }
+    .page-content {
+      text-align: center;
+    }
+    .edit-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+    .edit-form input, .edit-form textarea {
+      display: block;
+      margin: 10px 0;
+      width: 80%;
+    }
+    .edit-form textarea {
+      height: 150px;
+      white-space: pre-wrap;
+    }
+    .edit-form label {
+      margin-bottom: 5px;
+    }
+    button {
+      margin-top: 20px;
+    }
+    .page-content p {
+      word-break: break-all; /* 単語の長さが幅を超える場合に自動で改行する */
+      white-space: pre-wrap; /* 改行を保持しつつ適切に改行する */
+    }
+  </style>
+  <script>
+    const minimumDistance = 30;
+    const swipeThreshold = 100;
+    let startX = 0;
+    let startY = 0;
+    window.addEventListener('load', function() {
+      const profilePage = document.getElementById('profile');
+      const createGuidePage = document.getElementById('createguide');
+      const preferPage = document.getElementById('prefer');
+      let currentPage = 'profile';
+      window.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].pageX;
+        startY = e.touches[0].pageY;
+      });
+      window.addEventListener('touchend', (e) => {
+        const endX = e.changedTouches[0].pageX;
+        const endY = e.changedTouches[0].pageY;
+        const distanceX = endX - startX;
+        const distanceY = endY - startY;
+        if (Math.abs(distanceX) > Math.abs(distanceY) && Math.abs(distanceX) > swipeThreshold) {
+          if (distanceX > 0) {
+            if (currentPage === 'profile') {
+              showPage('createguide');
+              currentPage = 'createguide';
+            } else if (currentPage === 'prefer') {
+              showPage('profile');
+              currentPage = 'profile';
+            }
+          } else {
+            if (currentPage === 'profile') {
+              showPage('prefer');
+              currentPage = 'prefer';
+            } else if (currentPage === 'createguide') {
+              showPage('profile');
+              currentPage = 'profile';
+            }
+          }
+        }
+      });
+      function showPage(pageId) {
+        profilePage.style.display = 'none';
+        createGuidePage.style.display = 'none';
+        preferPage.style.display = 'none';
+        document.getElementById(pageId).style.display = 'flex';
+      }
+      const editButton = document.getElementById('edit-button');
+      const saveButton = document.getElementById('save-button');
+      const profileDisplay = document.getElementById('profile-display');
+      const profileEditForm = document.getElementById('profile-edit-form');
+      const likesInput = document.getElementById('profile-likes');
+      const maxChars = 150;
+      editButton.addEventListener('click', () => {
+        profileDisplay.classList.add('hidden');
+        profileEditForm.classList.remove('hidden');
+      });
+      likesInput.addEventListener('input', () => {
+        const currentLength = likesInput.value.length;
+        if (currentLength > maxChars) {
+          // 文字数制限を超えた場合、テキストを切り詰める
+          likesInput.value = likesInput.value.slice(0, maxChars);
+          alert('文字数の制限は150文字です。');
+        }
+      });
+      saveButton.addEventListener('click', () => {
+        if (likesInput.value.length > maxChars) {
+          alert('文字数が制限を超えています');
+          return;
+        }
+        const idInput = document.getElementById('profile-id');
+        document.getElementById('display-id').innerText = 'ID: ' + idInput.value;
+        document.getElementById('display-likes').innerText = likesInput.value;
+        profileDisplay.classList.remove('hidden');
+        profileEditForm.classList.add('hidden');
+      });
+    });
+  </script>
 </head>
 <body>
-    <div class="container">
-        <div class="page" id="prefer">
-            <h1>Prefer Page</h1>
-            <p></p>
+  <div class="container">
+    <div class="page" id="profile">
+      <div class="page-content" id="profile-display">
+        <h1>Profile Page</h1>
+        <p id="display-id">ID: 12345</p>
+        <p id="display-likes">私はお肉が好きです。</p>
+        <button id="edit-button">編集</button>
+      </div>
+      <div class="page-content hidden" id="profile-edit-form">
+        <h1>Profile Page</h1>
+        <div class="edit-form">
+          <label for="profile-id">ID</label>
+          <input type="text" id="profile-id" placeholder="ID" value="12345">
+          <label for="profile-likes">好きなもの</label>
+          <textarea id="profile-likes" placeholder="好きなもの">私はお肉が好きです。</textarea>
+          <button id="save-button">保存</button>
         </div>
-        <div class="page" id="createguide">
-            <h1>Create Guide Page</h1>
-            <p></p>
-        </div>
-        <div class="page" id="profile">
-            <h1>Profile Page</h1>
-            <p></p>
-        </div>
+      </div>
     </div>
-    <script src="home.js"></script>
+    <div class="page" id="createguide">
+      <h1>Create Guide Page</h1>
+      <p>ガイドの内容をここに表示します。</p>
+    </div>
+    <div class="page" id="prefer">
+      <h1>Prefer Page</h1>
+      <p>好みの情報をここに入力します。</p>
+    </div>
+  </div>
 </body>
 </html>
+
+
+
+
+
+
+
