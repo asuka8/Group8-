@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 from sqlalchemy import inspect
 from flask_cors import CORS
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='Front/html')
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 #db.init_app(app)
@@ -26,6 +26,10 @@ class User(db.Model):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/home')
+def home():
+    return render_template('home.html')
 
 @app.route('/load_attractions', methods=['GET'])
 def load_attractions():
