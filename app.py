@@ -1,7 +1,9 @@
 import json
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS
 
 @app.route('/')
 def index():
@@ -25,11 +27,9 @@ def load_markers():
     except FileNotFoundError:
         return []
 
-attractions = load_attractions()
-user_markers = load_markers()
-
 @app.route('/get_attractions', methods=['GET'])
 def get_attractions():
+    attractions = load_attractions()
     return jsonify(attractions), 200
 
 @app.route('/add_marker', methods=['POST'])
@@ -42,6 +42,7 @@ def add_marker():
     
     if lat is not None and lng is not None and location_name:
         marker = {'lat': lat, 'lng': lng, 'location_name': location_name, 'description': description, 'likes': 0, 'dislikes': 0}
+        user_markers = load_markers()
         user_markers.append(marker)
         save_markers(user_markers)
         return jsonify({'message': 'Marker added successfully!'}), 200
@@ -56,6 +57,7 @@ def update_marker():
     action = data.get('action')
     description = data.get('description', '')
     
+    user_markers = load_markers()
     for marker in user_markers:
         if marker['lat'] == lat and marker['lng'] == lng:
             if action == 'like':
@@ -71,7 +73,8 @@ def update_marker():
 
 @app.route('/get_markers', methods=['GET'])
 def get_markers():
-    return jsonify(user_markers), 200
+    markers = load_markers()
+    return jsonify(markers)
 
 if __name__ == '__main__':
     app.run(debug=True)
