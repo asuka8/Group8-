@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         #map {
-            height: 100vh; /* 设置地图高度为视窗高度 */
-            width: 100vw; /* 设置地图宽度为视窗宽度 */
+            height: 100vh;
+            width: 100vw;
         }
         #filter {
             position: absolute;
@@ -46,7 +46,7 @@
         textarea {
             width: 100%;
             height: 60px;
-            resize: none; /* 禁用调整大小 */
+            resize: none;
         }
     </style>
 </head>
@@ -63,7 +63,7 @@
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        var map = L.map('map').setView([35.0262444, 135.7808218], 15); // 默认显示京都
+        var map = L.map('map').setView([35.0262444, 135.7808218], 15);
         var userLocation = null;
         var attractions = [];
         var markers = [];
@@ -73,11 +73,11 @@
         }).addTo(map);
 
         function createMarker(lat, lng, name, description, likes, dislikes) {
-            var color = 'blue'; // 默认颜色蓝色
+            var color = 'blue';
             if (likes > 0) {
-                color = 'red'; // 喜欢时为红色
+                color = 'red';
             } else if (dislikes > 0) {
-                color = 'gray'; // 不喜欢时为灰色
+                color = 'gray';
             }
 
             var icon = new L.Icon({
@@ -98,11 +98,11 @@
         }
 
         function updateMarkerColor(lat, lng, likes, dislikes) {
-            var color = 'blue'; // 默认颜色蓝色
+            var color = 'blue'; 
             if (likes > 0) {
-                color = 'red'; // 喜欢时为红色
+                color = 'red';
             } else if (dislikes > 0) {
-                color = 'gray'; // 不喜欢时为灰色
+                color = 'gray';
             }
 
             var iconUrl = 'https://chart.googleapis.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|' + color;
@@ -118,7 +118,6 @@
             });
         }
 
-        // 显示所有景点
         function showAllAttractions() {
             attractions.forEach(attraction => {
                 createMarker(attraction.lat, attraction.lng, attraction.name, "", 0, 0);
@@ -127,7 +126,7 @@
 
         function filterAttractions() {
             var distance = document.getElementById('distance').value;
-            distance = parseInt(distance); // 确保是数字类型
+            distance = parseInt(distance);
             markers.forEach(marker => {
                 map.removeLayer(marker);
             });
@@ -186,7 +185,7 @@
                 if (data.likes !== undefined && data.dislikes !== undefined) {
                     updateMarkerColor(lat, lng, data.likes, data.dislikes);
                 }
-                fetchMarkers(); // 重新加载标记
+                fetchMarkers();
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -221,8 +220,8 @@
             })
             .then(data => {
                 attractions = data;
-                console.log('Attractions loaded:', attractions); // Debugging log
-                showAllAttractions(); // 显示所有景点
+                console.log('Attractions loaded:', attractions);
+                showAllAttractions();
             })
             .catch(error => {
                 console.error('Error fetching attractions:', error);
@@ -271,7 +270,7 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
-                    fetchMarkers(); // 重新加载标记
+                    fetchMarkers();
                 })
                 .catch(error => {
                     console.error('Error:', error);
