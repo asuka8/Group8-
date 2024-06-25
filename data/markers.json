@@ -3,8 +3,24 @@
         "lat": 35.02805478912971,
         "lng": 135.78064084053042,
         "location_name": "京都大学",
-        "description": null,
+        "description": "null",
         "likes": 2,
         "dislikes": 1
+    },
+    {
+        "lat": 35.039368,
+        "lng": 135.729243,
+        "location_name": "金閣寺",
+        "description": "",
+        "likes": 1,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.014207,
+        "lng": 135.748028,
+        "location_name": "二条城",
+        "description": "",
+        "likes": 1,
+        "dislikes": 0
     }
 ]

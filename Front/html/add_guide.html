@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Guide</title>
+</head>
+<body>
+    <h1>Add Guide</h1>
+    <form action="{{ url_for('add_guide', user_id=user_id) }}" method="POST">
+        <label for="content">Content:</label>
+        <textarea id="content" name="content" required></textarea><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
