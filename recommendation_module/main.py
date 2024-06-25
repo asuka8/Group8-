@@ -9,9 +9,17 @@ print(user_interests)
 
 user_profile = {
     'interests': user_interests,
-    'like_dislike': {}
+    'like_dislike': {
+        '清水寺': True,
+        '京都御所': False,
+        '嵐山': True,
+        '先斗町': False
+    }
 }
 
 recommended_spots = recommend_spots(user_location, user_profile, './attractions.json')
+
+print(user_interests)
+
 for spot in recommended_spots:
     print(f"{spot['name']}: {spot['score']}, 距離: {spot['distance']}km")
