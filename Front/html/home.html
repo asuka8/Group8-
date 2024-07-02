@@ -12,40 +12,33 @@
     }
     .container {
       display: flex;
-      width: 100%;
+      width: 300%;
       height: 100%;
+      transition: transform 0.5s ease;
+      transform: translateX(-33.3333%);
     }
     .page {
-      min-width: 100%;
+      min-width: 33.3333%;
       height: 100%;
-      display: none;
+      display: flex;
       justify-content: center;
       align-items: center;
       font-size: 24px;
+      position: relative;
     }
     #profile {
       background-color: lightblue;
-      display: flex;
       flex-direction: column;
       align-items: center;
-      width: 100%;
-      height: 100%;
     }
     #createguide {
       background-color: lightgreen;
-      width: 100%;
-      height: 100%;
     }
     #prefer {
       background-color: lightcoral;
-      width: 100%;
-      height: 100%;
     }
     .hidden {
       display: none;
-    }
-    .visible {
-      display: block;
     }
     .page-content {
       text-align: center;
@@ -76,52 +69,57 @@
       word-break: break-all; /* 単語の長さが幅を超える場合に自動で改行する */
       white-space: pre-wrap; /* 改行を保持しつつ適切に改行する */
     }
+    .great {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    font-size: 16px;
+    color: darkblue;
+    }
+    .swipe-hint {
+      position: absolute;
+      bottom: 10px;
+      font-size: 16px;
+    }
+    .swipe-left {
+      left: 10px;
+    }
+    .swipe-right {
+      right: 10px;
+    }
   </style>
   <script>
-    const minimumDistance = 30;
-    const swipeThreshold = 100;
+    const swipeThreshold = 60;
     let startX = 0;
-    let startY = 0;
     window.addEventListener('load', function() {
-      const profilePage = document.getElementById('profile');
-      const createGuidePage = document.getElementById('createguide');
-      const preferPage = document.getElementById('prefer');
+      const container = document.querySelector('.container');
       let currentPage = 'profile';
       window.addEventListener('touchstart', (e) => {
         startX = e.touches[0].pageX;
-        startY = e.touches[0].pageY;
       });
       window.addEventListener('touchend', (e) => {
         const endX = e.changedTouches[0].pageX;
-        const endY = e.changedTouches[0].pageY;
         const distanceX = endX - startX;
-        const distanceY = endY - startY;
-        if (Math.abs(distanceX) > Math.abs(distanceY) && Math.abs(distanceX) > swipeThreshold) {
-          if (distanceX > 0) {
+        if (Math.abs(distanceX) > swipeThreshold) {
+          if (distanceX < 0) { // 左方向へのスワイプ
             if (currentPage === 'profile') {
-              showPage('createguide');
-              currentPage = 'createguide';
-            } else if (currentPage === 'prefer') {
-              showPage('profile');
-              currentPage = 'profile';
-            }
-          } else {
-            if (currentPage === 'profile') {
-              showPage('prefer');
+              container.style.transform = 'translateX(-66.6666%)';
               currentPage = 'prefer';
             } else if (currentPage === 'createguide') {
-              showPage('profile');
+              container.style.transform = 'translateX(-33.3333%)';
+              currentPage = 'profile';
+            }
+          } else { // 右方向へのスワイプ
+            if (currentPage === 'profile') {
+              container.style.transform = 'translateX(0)';
+              currentPage = 'createguide';
+            } else if (currentPage === 'prefer') {
+              container.style.transform = 'translateX(-33.3333%)';
               currentPage = 'profile';
             }
           }
         }
       });
-      function showPage(pageId) {
-        profilePage.style.display = 'none';
-        createGuidePage.style.display = 'none';
-        preferPage.style.display = 'none';
-        document.getElementById(pageId).style.display = 'flex';
-      }
       const editButton = document.getElementById('edit-button');
       const saveButton = document.getElementById('save-button');
       const profileDisplay = document.getElementById('profile-display');
@@ -135,7 +133,6 @@
       likesInput.addEventListener('input', () => {
         const currentLength = likesInput.value.length;
         if (currentLength > maxChars) {
-          // 文字数制限を超えた場合、テキストを切り詰める
           likesInput.value = likesInput.value.slice(0, maxChars);
           alert('文字数の制限は150文字です。');
         }
@@ -156,11 +153,16 @@
 </head>
 <body>
   <div class="container">
+    <div class="page" id="createguide">
+      <h1>Create Guide Page</h1>
+      <p>過去に作ったガイドを表示します。</p>
+      <div class="swipe-hint swipe-right">profile→</div>
+    </div>
     <div class="page" id="profile">
       <div class="page-content" id="profile-display">
         <h1>Profile Page</h1>
         <p id="display-id">ID: 12345</p>
-        <p id="display-likes">私はお肉が好きです。</p>
+        <p id="display-likes">アニョハセヨ。</p>
         <button id="edit-button">編集</button>
       </div>
       <div class="page-content hidden" id="profile-edit-form">
@@ -173,22 +175,17 @@
           <button id="save-button">保存</button>
         </div>
       </div>
-    </div>
-    <div class="page" id="createguide">
-      <h1>Create Guide Page</h1>
-      <p>ガイドの内容をここに表示します。</p>
+      <div class="swipe-hint swipe-right">prefer→</div>
+      <div class="swipe-hint swipe-left">←create guide</div>
+      <div class="register-link">
+        <a href="index.html" style="font-size: 14px; margin-top: 10px;">マップに戻る</a>
+      </div>
     </div>
     <div class="page" id="prefer">
       <h1>Prefer Page</h1>
-      <p>好みの情報をここに入力します。</p>
+      <p>評価したガイドを表示します。</p>
+      <div class="swipe-hint swipe-left">←profile</div>
     </div>
   </div>
 </body>
 </html>
-
-
-
-
-
-
-
