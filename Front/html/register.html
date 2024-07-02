@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新規登録ページ</title>
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="register-container">
@@ -14,14 +13,25 @@
             <input type="text" id="username" name="username" required><br>
             <label for="password">パスワード:</label>
             <input type="password" id="password" name="password" required><br>
-            <label for="confirmPassword">パスワード確認:</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" required><br>
             <input type="submit" value="登録">
         </form>
         <div class="login-link">
             <p><a href="login.html">ログイン画面に戻る</a></p>
         </div>
     </div>
-    <script src="register.js"></script>
+    <script>
+        function registerUser() {
+            const userId = document.getElementById('userId').value;
+            const password = document.getElementById('password').value;
+            if (userId && password) {
+                //変更箇所
+                localStorage.setItem(userId, password);
+                alert("登録が完了しました");
+                window.location.href = 'login.html';
+            } else {
+                alert("すべての項目を入力して下さい");
+            }
+        }
+    </script>
 </body>
 </html>

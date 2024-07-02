@@ -9,7 +9,7 @@
 <body>
     <div class="login-container">
         <h1>ログイン</h1>
-        <form id="loginForm" action="login_process.php" method="post">
+        <form id="loginForm">
             <label for="userId">ユーザーID:</label>
             <input type="text" id="userId" name="userId" required><br>
             <label for="password">パスワード:</label>
@@ -21,6 +21,21 @@
             <a href="index.html">マップに戻る</a>
         </div>
     </div>
-    <script src="login.js"></script>
+    <script>
+        function loginUser() {
+            const userId = document.getElementById('userId').value;
+            const password = document.getElementById('password').value;
+            //変更箇所
+            const storedPassword = localStorage.getItem(userId);
+//変更箇所
+            if (storedPassword && storedPassword === password) {
+                alert("ログイン成功！");
+                window.location.href = 'home.html';
+            } else {
+                alert("ユーザIDまたはパスワードが違います");
+            }
+        }
+    </script>
+
 </body>
 </html>
