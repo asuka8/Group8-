@@ -180,4 +180,7 @@ def get_user(id):
 
 
 if __name__ == '__main__':
+    with app.app_context():
+        inspector = inspect(db.engine)
+        print(inspector.get_table_names())
     app.run(debug=True)
