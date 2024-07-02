@@ -10,6 +10,17 @@
             height: 100vh;
             width: 100vw;
         }
+        #search-bar {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
         #filter {
             position: absolute;
             top: 10px;
@@ -61,9 +72,38 @@
         </select>
         <button onclick="filterAttractions()">Apply Filter</button>
     </div>
+
+    <div id="search-bar">
+        <label for="search-input">Search:</label>
+        <input type="text" id="search-input" placeholder="Enter location name">
+        <button onclick="searchAttractions()">Search</button>
+        <ul id="search-results"></ul>
+    </div>
+
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
+        // 検索バーのイベントリスナーを追加
+        document.getElementById('search-input').addEventListener('input', searchAttractions);
+
+        // 検索機能の実装
+        function searchAttractions() {
+            var searchValue = document.getElementById('search-input').value.trim().toLowerCase();
+            var resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = '';
+
+            attractions.forEach(attraction => {
+                if (attraction.name.toLowerCase().includes(searchValue)) {
+                    var li = document.createElement('li');
+                    li.textContent = attraction.name;
+                    li.addEventListener('click', function() {
+                        map.setView([attraction.lat, attraction.lng], 15);
+                    });
+                    resultsContainer.appendChild(li);
+                }
+            });
+        }
+
         var map = L.map('map').setView([35.0262444, 135.7808218], 15);
         var userLocation = null;
         var attractions = [];
