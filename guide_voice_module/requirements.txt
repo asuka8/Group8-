@@ -1,0 +1,4 @@
+gTTS==2.5.1
+langdetect==1.0.9
+openai==0.28.0
+pygame==2.5.2
