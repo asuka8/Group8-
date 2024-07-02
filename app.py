@@ -1,11 +1,13 @@
 import json
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, render_template, redirect, url_for, abort
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from flask_migrate import Migrate
 #from model.models import User
 from sqlalchemy import inspect
 from flask_cors import CORS
+from datetime import date
+from sqlalchemy.orm import relationship
 
 app = Flask(__name__, template_folder='Front/html')
 app.config.from_object(Config)
@@ -19,9 +21,42 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
+    guide = relationship('Guide', backref='user')
+    userprofile = relationship('UserProfile', backref='user', uselist=False, cascade = "delete")
+    like_dislike = relationship('Like_Dislike', backref='user', cascade = "delete")
 
     def __repr__(self):
         return f'<User {self.username}>'
+    
+class UserProfile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    bio = db.Column(db.String(1024), default='')
+
+    def __repr__(self):
+        return f"<UserProfile('{self.user_id}', '{self.bio}')>"
+    
+class Guide(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    content = db.Column(db.String(1024), default='')
+    created_at = db.Column(db.Date, default=date.today)
+    updated_at = db.Column(db.Date, default=date.today, onupdate=date.today)
+    like_dislike = relationship('Like_Dislike', backref='guide', cascade = "delete")
+
+    def __repr__(self):
+        return f"<Guide('{self.user_id}', '{self.content}')>"
+   
+class Like_Dislike(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    guide_id = db.Column(db.Integer, db.ForeignKey('guide.id'), nullable=False)
+    status = db.Column(db.Integer, nullable=False, default = 0)
+
+    def __repr__(self):
+        return f"<LikeDislike('{self.user_id}', '{self.guide_id}', '{self.status}')>"
 
 @app.route('/')
 def index():
@@ -178,6 +213,55 @@ def get_user(id):
         return jsonify({'error': 'User not found'}), 404
     return jsonify({'id': user.id, 'username': user.username}), 200
 
+"""@app.route('/add_guide/<int:user_id>', methods=['GET', 'POST'])
+def add_guide(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return abort(404, description="User not found")
+    if request.method == 'POST':
+        content = request.form.get('content')
+        if content is None:
+            return abort(400, description="content is required")
+        new_guide = Guide(user_id=user_id, content=content)
+        try:
+            db.session.add(new_guide)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+        return redirect(url_for('get_guide', user_id=new_guide.id))
+    return render_template('add_guide.html', user_id=user_id)    """
+
+@app.route('/add_guide/<int:user_id>', methods=['GET', 'POST'])
+def add_guide(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return abort(404, description="User not found")
+    if request.method == 'POST':
+        content = request.form.get('content')
+        if content is None:
+            return abort(400, description="content is required")
+        new_guide = Guide(user_id=user_id, content=content)
+        try:
+            db.session.add(new_guide)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+        return redirect(url_for('get_guide', user_id=user_id))  # ここを修正
+    return render_template('add_guide.html', user_id=user_id)    
+
+@app.route('/get_guide/<int:user_id>', methods=['GET'])
+def get_guide(user_id):
+    #guide = Guide.query.get(user_id)    #ガイドのidになってしまっている
+    guides = Guide.query.filter_by(user_id=user_id).all()
+    if guides is None:
+        return jsonify({'error': 'No guides found for this user'}), 404
+    return jsonify([{'id': guide.id, 'user_id': guide.user_id, 'content': guide.content} for guide in guides]), 200
+
 
 if __name__ == '__main__':
+    with app.app_context():
+        inspector = inspect(db.engine)
+        print(inspector.get_table_names())
     app.run(debug=True)
