@@ -33,7 +33,7 @@ class User(db.Model):
     
 class UserProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
     bio = db.Column(db.String(1024), default='')
 
     def __repr__(self):
@@ -62,14 +62,14 @@ class Like_Dislike(db.Model):
         return f"<LikeDislike('{self.user_id}', '{self.guide_id}', '{self.status}')>"
 
 # Userと同時にUserprofileも作成
-@event.listens_for(User, 'after_insert')
+'''@event.listens_for(User, 'after_insert')
 def create_user_profile(mapper, connection, target):
     try:
         new_profile = UserProfile(user_id=target.id)
         connection.execute(UserProfile.__table__.insert(), {'user_id': target.id})
     except Exception as e:
         db.session.rollback()
-        raise e
+        raise e'''
     
 @app.route('/')
 def index():
@@ -246,7 +246,13 @@ def add_user():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
+    new_userprofile = UserProfile(user_id=new_user.id, bio='')
+    try:
+        db.session.add(new_userprofile)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
     return redirect(url_for('login'))    # ここを修正
 
 
