@@ -9,32 +9,18 @@
 <body>
     <div class="login-container">
         <h1>ログイン</h1>
-        <form id="loginForm">
+        <form id="loginForm" action="{{ url_for('login') }}" method="post">
             <label for="userId">ユーザーID:</label>
-            <input type="text" id="userId" name="userId" required><br>
+            <input type="text" id="username" name="username" required><br>
             <label for="password">パスワード:</label>
             <input type="password" id="password" name="password" required><br>
             <input type="submit" value="ログイン">
         </form>
         <div class="register-link">
-            <a href="Register.html">新規登録</a>
+            <a href="{{ url_for('add_user_page') }}">新規登録</a>
+            <a href="{{ url_for('index') }}">マップに戻る</a>
         </div>
     </div>
-    <script>
-        function loginUser() {
-            const userId = document.getElementById('userId').value;
-            const password = document.getElementById('password').value;
-            //変更箇所
-            const storedPassword = localStorage.getItem(userId);
-//変更箇所
-            if (storedPassword && storedPassword === password) {
-                alert("ログイン成功！");
-                window.location.href = 'home.html';
-            } else {
-                alert("ユーザIDまたはパスワードが違います");
-            }
-        }
-    </script>
-
+    <script src="login.js"></script>
 </body>
 </html>

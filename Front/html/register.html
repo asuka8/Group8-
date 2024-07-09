@@ -8,30 +8,19 @@
 <body>
     <div class="register-container">
         <h1>新規登録</h1>
-        <form id="registerForm" action="register_process.php" method="post">
+        <form id="registerForm" action="/add_user" method="post">
             <label for="username">ユーザーID:</label>
             <input type="text" id="username" name="username" required><br>
             <label for="password">パスワード:</label>
             <input type="password" id="password" name="password" required><br>
+            <label for="confirmPassword">パスワード確認:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required><br>
             <input type="submit" value="登録">
         </form>
         <div class="login-link">
-            <p><a href="login.html">ログイン画面に戻る</a></p>
+            <p><a href="{{ url_for('login') }}">ログイン画面に戻る</a></p>
         </div>
     </div>
-    <script>
-        function registerUser() {
-            const userId = document.getElementById('userId').value;
-            const password = document.getElementById('password').value;
-            if (userId && password) {
-                //変更箇所
-                localStorage.setItem(userId, password);
-                alert("新規登録完了！");
-                window.location.href = 'login.html';
-            } else {
-                alert("すべての項目を入力して下さい");
-            }
-        }
-    </script>
+    <script src="register.js"></script>
 </body>
 </html>
