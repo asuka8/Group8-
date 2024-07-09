@@ -372,7 +372,7 @@ def update_userprofile(user_id):
     
     userprofile = UserProfile.query.filter_by(user_id=user_id).first()
     if not userprofile:
-        return abort(404, description="User profile not found")
+        return abort(404, description="User profile not found.")
     
     if request.method == 'POST':
         bio = request.form.get('bio')
