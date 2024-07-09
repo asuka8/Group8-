@@ -1,5 +1,6 @@
 import json
-from flask import Flask, request, jsonify, render_template, redirect, url_for, abort
+from flask import Flask, request, jsonify, render_template, redirect, url_for, abort, session, flash
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from flask_migrate import Migrate
@@ -74,9 +75,35 @@ def create_user_profile(mapper, connection, target):
 def index():
     return render_template('index.html')
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        user = User.query.filter_by(username=username).first()
+
+        if user and password==user.password:
+            session['user_id'] = user.id
+            flash('Login successful!', 'success')
+            return redirect(url_for('user_page', user_id=user.id)) 
+        else:
+            flash('Invalid username or password', 'danger')
+            return render_template('login.html', error='Invalid username or password')
+
+    return render_template('login.html')
+
+
 @app.route('/home')
 def home():
     return render_template('home.html')
+
+@app.route('/user/<int:user_id>')
+def user_page(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return abort(404, description="User not found")
+    return render_template('home.html', user=user)
 
 @app.route('/load_attractions', methods=['GET'])
 def load_attractions():
@@ -188,18 +215,22 @@ def add_user():
 
 @app.route('/add_user_page')
 def add_user_page():
-    return render_template('add_user.html')
+    return render_template('register.html')
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
     username = request.form['username']
     password = request.form['password']
+    confirmPassword = request.form['confirmPassword']
 
     if username is None or password is None:
         return jsonify({'error': 'Invalid data'}), 400
 
     if User.query.filter_by(username=username).first() is not None:
         return jsonify({'error': 'User already exists'}), 400
+    
+    if password != confirmPassword:
+        return jsonify({'error': 'Passwords do not match'}), 400
 
     new_user = User(username=username, password=password)
     try:
@@ -209,7 +240,7 @@ def add_user():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-    return redirect(url_for('get_users'))
+    return redirect(url_for('login'))    # ここを修正
 
 
 @app.route('/get_users', methods=['GET'])

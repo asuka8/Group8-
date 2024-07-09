@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新規登録ページ</title>
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="register-container">
         <h1>新規登録</h1>
-        <form id="registerForm" action="register_process.php" method="post">
+        <form id="registerForm" action="/add_user" method="post">
             <label for="username">ユーザーID:</label>
             <input type="text" id="username" name="username" required><br>
             <label for="password">パスワード:</label>
@@ -19,7 +18,7 @@
             <input type="submit" value="登録">
         </form>
         <div class="login-link">
-            <p><a href="login.html">ログイン画面に戻る</a></p>
+            <p><a href="{{ url_for('login') }}">ログイン画面に戻る</a></p>
         </div>
     </div>
     <script src="register.js"></script>
