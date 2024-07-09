@@ -59,6 +59,22 @@
             height: 60px;
             resize: none;
         }
+        .bottom-left-buttons {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1100;
+        }
+
+        /* ボタンのスタイル */
+        .bottom-left-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -81,8 +97,26 @@
     </div>
 
     <div id="map"></div>
+    <div class="bottom-left-buttons">
+        <button id="logout-button">ログアウト</button>
+        <button onclick="window.location.href='home.html'">ホームへ</button>
+    </div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const logoutButton = document.getElementById('logout-button');
+
+            logoutButton.addEventListener('click', function () {
+                const confirmLogout = confirm('ログアウトしますか？');
+
+                if (confirmLogout) {
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+
+        document.getElementById('search-input').addEventListener('input', searchAttractions);
+
         // 検索バーのイベントリスナーを追加
         document.getElementById('search-input').addEventListener('input', searchAttractions);
 
