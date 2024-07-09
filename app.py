@@ -213,6 +213,44 @@ def get_user(id):
         return jsonify({'error': 'User not found'}), 404
     return jsonify({'id': user.id, 'username': user.username}), 200
 
+<<<<<<< Updated upstream
+=======
+"""@app.route('/add_guide/<int:user_id>', methods=['GET', 'POST'])
+def add_guide(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return abort(404, description="User not found")
+    if request.method == 'POST':
+        content = request.form.get('content')
+        if content is None:
+            return abort(400, description="content is required")
+        new_guide = Guide(user_id=user_id, content=content)
+        try:
+            db.session.add(new_guide)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+        return redirect(url_for('get_guide', user_id=new_guide.id))
+    return render_template('add_guide.html', user_id=user_id)    """
+
+@app.route('/delete_user/<int:user_id>', methods=['GET', 'POST'])
+def delete_user(user_id):
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify({'error':'User not found'}), 404
+    if request.method == 'POST':
+        try:
+            db.session.delete(user)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+        return redirect(url_for('get_users'))
+    return render_template('delete_user.html', user=user)
+
+
+>>>>>>> Stashed changes
 @app.route('/add_guide/<int:user_id>', methods=['GET', 'POST'])
 def add_guide(user_id):
     user = User.query.get(user_id)
@@ -229,9 +267,137 @@ def add_guide(user_id):
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
+<<<<<<< Updated upstream
         return redirect(url_for('get_users'))
     return render_template('add_guide.html', user_id=user_id)         
                      
                                                 
+=======
+        return redirect(url_for('get_guide', user_id=user_id))  # ここを修正
+    return render_template('add_guide.html', user_id=user_id)    
+
+@app.route('/get_guide/<int:user_id>', methods=['GET'])
+def get_guide(user_id):
+    #guide = Guide.query.get(user_id)    #ガイドのidになってしまっている
+    guides = Guide.query.filter_by(user_id=user_id).all()
+    if guides is None:
+        return jsonify({'error': 'No guides found for this user'}), 404
+    return jsonify([{'id': guide.id, 'user_id': guide.user_id, 'content': guide.content} for guide in guides]), 200
+
+
+@app.route('/get_guide/<int:user_id>/delete_guide/<int:guide_id>', methods=['GET', 'POST'])
+def delete_guide(user_id, guide_id):
+    guide = Guide.query.filter_by(id=guide_id, user_id=user_id).first()
+    if guide is None:
+        return jsonify({'error': 'Guide not found'}), 404
+    if request.method == 'POST':
+        try:
+            db.session.delete(guide)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+        return redirect(url_for('get_guide', user_id=user_id)) 
+    return render_template('delete_guide.html', guide=guide)
+
+@app.route('/update_guide/<int:user_id>/<int:guide_id>', methods=['GET', 'POST'])
+def update_guide(user_id, guide_id):
+    user = User.query.get(user_id)
+    if not user:
+        return abort(404, description="User not found")
+    
+    guide = Guide.query.filter_by(id=guide_id, user_id=user_id).first()
+    if not guide:
+        return abort(404, description="Guide not found")
+    
+    if request.method == 'POST':
+        content = request.form.get('content')
+        if content is None:
+            return abort(400, description="Content is required")
+        guide.content = content
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+        return redirect(url_for('get_guide', user_id=user_id))
+
+    return render_template('update_guide.html', user_id=user_id, guide_id=guide_id, content=guide.content)
+
+
+@app.route('/add_userprofile/<int:user_id>', methods = ['GET', 'POST'])
+def add_userprofile(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return abort(404, description="User not found")
+    
+    existing_userprofile = UserProfile.query.filter_by(user_id=user_id).first()
+    if existing_userprofile:
+        return redirect(url_for('update_userprofile', user_id=user_id)) #既存ならupdate_profileに移る
+    
+    if request.method == 'POST':
+        bio = request.form.get('bio')
+        if bio is None:
+            return abort(400, description="bio is required")
+        new_userprofile = UserProfile(user_id=user_id, bio=bio)
+        try:
+            db.session.add(new_userprofile)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error':str(e)}), 500
+        return redirect(url_for('get_userprofile', user_id=user_id))
+    return render_template('add_userprofile.html', user_id=user_id)
+
+@app.route('/get_userprofile/<int:user_id>', methods = ['GET'])
+def get_userprofile(user_id):
+    userprofiles = UserProfile.query.filter_by(user_id=user_id).all()
+    if userprofiles is None:
+        return jsonify({'error': 'No userprofiles found for this user'}), 404
+    return jsonify([{'id':userprofile.id, 'user_id':userprofile.user_id, 'bio':userprofile.bio} for userprofile in userprofiles]), 200
+
+
+@app.route('/delete_userprofile/<int:user_id>', methods=['GET', 'POST'])
+def delete_userprofile(user_id):
+    userprofile = UserProfile.query.get(user_id)
+    if userprofile is None:
+        return jsonify({'error':'UserProfile not found'}), 404
+    if request.method == 'POST':
+        try:
+            db.session.delete(userprofile)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+        return redirect(url_for('get_userprofile', user_id=user_id))
+    return render_template('delete_userprofile.html', user=userprofile)
+
+@app.route('/update_userprofile/<int:user_id>', methods=['GET', 'POST'])
+def update_userprofile(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return abort(404, description="User not found")
+    
+    userprofile = UserProfile.query.filter_by(user_id=user_id).first()
+    if not userprofile:
+        return abort(404, description="User profile not found")
+    
+    if request.method == 'POST':
+        bio = request.form.get('bio')
+        if bio is None:
+            return abort(400, description="bio is required")
+        userprofile.bio = bio
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+        return redirect(url_for('get_userprofile', user_id=user_id))
+
+    return render_template('update_userprofile.html', user_id=user_id, bio=userprofile.bio)
+
+
+>>>>>>> Stashed changes
 if __name__ == '__main__':
     app.run(debug=True)

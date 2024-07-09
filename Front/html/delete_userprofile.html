@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete UserProfile</title>
+</head>
+<body>
+    <h1>Delete UserProfile</h1>
+    <p>Are you sure you want to delete user profile {{ userprofile }}?</p>
+    <form action="{{ url_for('delete_userprofile', user_id=user.id) }}" method="POST">
+        <input type="submit" value="Delete">
+    </form>
+</body>
+</html>

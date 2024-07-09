@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update User Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Update User Profile</h1>
+    
+    <form method="POST" action="{{ url_for('update_userprofile', user_id=user_id) }}">
+        <label for="bio">Bio:</label>
+        <textarea name="bio" id="bio" rows="4" cols="50">{{ bio }}</textarea>
+        <br>
+        
+        <input type="submit" value="Update Profile">
+    </form>
+    
+    <a href="{{ url_for('get_userprofile', user_id=user_id) }}">Cancel</a>
+</body>
+</html>

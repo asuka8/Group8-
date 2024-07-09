@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add UserProfile</title>
+</head>
+<body>
+    <h1>Add UserProfile</h1>
+    <form action="{{ url_for('add_userprofile', user_id=user_id) }}" method="POST">
+        <label for="bio">bio:</label>
+        <textarea id="bio" name="bio" required></textarea><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

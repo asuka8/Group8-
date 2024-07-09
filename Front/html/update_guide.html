@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Guide</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Update Guide</h1>
+    
+    <form method="POST" action="{{ url_for('update_guide', user_id=user_id, guide_id=guide_id) }}">
+        <label for="content">Content:</label>
+        <textarea name="content" id="content" rows="4" cols="50">{{ content }}</textarea>
+        <br>
+        
+        <input type="submit" value="Update Guide">
+    </form>
+    
+    <a href="{{ url_for('get_guide', user_id=user_id) }}">Cancel</a>
+</body>
+</html>
