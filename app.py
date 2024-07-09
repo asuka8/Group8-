@@ -3,11 +3,11 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, a
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from flask_migrate import Migrate
+#from model.models import User
 from sqlalchemy import inspect
 from flask_cors import CORS
 from datetime import date
 from sqlalchemy.orm import relationship
-
 
 app = Flask(__name__, template_folder='Front/html')
 app.config.from_object(Config)
@@ -44,12 +44,12 @@ class Guide(db.Model):
     content = db.Column(db.String(1024), default='')
     created_at = db.Column(db.Date, default=date.today)
     updated_at = db.Column(db.Date, default=date.today, onupdate=date.today)
-    like_dislike = relationship('Like_Dislike', backref='user', cascade = "delete")
+    like_dislike = relationship('Like_Dislike', backref='guide', cascade = "delete")
 
     def __repr__(self):
         return f"<Guide('{self.user_id}', '{self.content}')>"
    
-class LikeDislike(db.Model):
+class Like_Dislike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     guide_id = db.Column(db.Integer, db.ForeignKey('guide.id'), nullable=False)
@@ -213,8 +213,6 @@ def get_user(id):
         return jsonify({'error': 'User not found'}), 404
     return jsonify({'id': user.id, 'username': user.username}), 200
 
-<<<<<<< Updated upstream
-=======
 """@app.route('/add_guide/<int:user_id>', methods=['GET', 'POST'])
 def add_guide(user_id):
     user = User.query.get(user_id)
@@ -250,7 +248,6 @@ def delete_user(user_id):
     return render_template('delete_user.html', user=user)
 
 
->>>>>>> Stashed changes
 @app.route('/add_guide/<int:user_id>', methods=['GET', 'POST'])
 def add_guide(user_id):
     user = User.query.get(user_id)
@@ -267,12 +264,6 @@ def add_guide(user_id):
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
-<<<<<<< Updated upstream
-        return redirect(url_for('get_users'))
-    return render_template('add_guide.html', user_id=user_id)         
-                     
-                                                
-=======
         return redirect(url_for('get_guide', user_id=user_id))  # ここを修正
     return render_template('add_guide.html', user_id=user_id)    
 
@@ -398,6 +389,8 @@ def update_userprofile(user_id):
     return render_template('update_userprofile.html', user_id=user_id, bio=userprofile.bio)
 
 
->>>>>>> Stashed changes
 if __name__ == '__main__':
+    with app.app_context():
+        inspector = inspect(db.engine)
+        print(inspector.get_table_names())
     app.run(debug=True)
