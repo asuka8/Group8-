@@ -165,15 +165,19 @@
         <p id="display-likes">{{ userprofile.bio }}</p>
         <button id="edit-button">編集</button>
       </div>
+  
       <div class="page-content hidden" id="profile-edit-form">
-        <h1>Profile Page</h1>
-        <div class="edit-form">
-          <label for="profile-id">ID</label>
-          <input type="text" id="profile-id" placeholder="ID" value="{{ user.username }}">
-          <label for="profile-likes">好きなもの</label>
-          <textarea id="profile-likes" placeholder="好きなもの">{{ userprofile.bio }}</textarea>
-          <button id="save-button">保存</button>
-        </div>
+          <h1>Profile Page</h1>
+          <form action="{{ url_for('update_profile') }}" method="post">
+              <div class="edit-form">
+                  <label for="profile-id">ID</label>
+                  <input type="text" id="profile-id" name="username" placeholder="ID" value="{{ user.username }}">
+                  <label for="profile-likes">好きなもの</label>
+                  <textarea id="profile-likes" name="likes" placeholder="好きなもの">{{ userprofile.bio }}</textarea>
+                  <button type="submit" id="save-button">保存</button>
+              </div>
+          </form>
+      </div>
       </div>
       <div class="swipe-hint swipe-right">prefer→</div>
       <div class="swipe-hint swipe-left">←create guide</div>
