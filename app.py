@@ -8,6 +8,8 @@ from sqlalchemy import inspect
 from flask_cors import CORS
 from datetime import date
 from sqlalchemy.orm import relationship
+from sqlalchemy import event
+
 
 app = Flask(__name__, template_folder='Front/html')
 app.config.from_object(Config)
@@ -57,6 +59,16 @@ class Like_Dislike(db.Model):
 
     def __repr__(self):
         return f"<LikeDislike('{self.user_id}', '{self.guide_id}', '{self.status}')>"
+
+# Userと同時にUserprofileも作成
+@event.listens_for(User, 'after_insert')
+def create_user_profile(mapper, connection, target):
+    try:
+        new_profile = UserProfile(user_id=target.id)
+        connection.execute(UserProfile.__table__.insert(), {'user_id': target.id})
+    except Exception as e:
+        db.session.rollback()
+        raise e
 
 @app.route('/')
 def index():
@@ -357,6 +369,11 @@ def get_userprofile(user_id):
         return jsonify({'error': 'No userprofiles found for this user'}), 404
     return jsonify([{'id':userprofile.id, 'user_id':userprofile.user_id, 'bio':userprofile.bio} for userprofile in userprofiles]), 200
 
+@app.route('/get_userprofiles', methods=['GET'])
+def get_userprofiles():
+    userprofiles = UserProfile.query.all()
+    userprofiles_list = [{'id': userprofile.id, 'userid': userprofile.user_id, 'bio': userprofile.bio} for userprofile in userprofiles]
+    return jsonify(userprofiles_list), 200
 
 @app.route('/delete_userprofile/<int:user_id>', methods=['GET', 'POST'])
 def delete_userprofile(user_id):
