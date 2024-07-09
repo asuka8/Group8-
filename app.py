@@ -213,25 +213,6 @@ def get_user(id):
         return jsonify({'error': 'User not found'}), 404
     return jsonify({'id': user.id, 'username': user.username}), 200
 
-"""@app.route('/add_guide/<int:user_id>', methods=['GET', 'POST'])
-def add_guide(user_id):
-    user = User.query.get(user_id)
-    if not user:
-        return abort(404, description="User not found")
-    if request.method == 'POST':
-        content = request.form.get('content')
-        if content is None:
-            return abort(400, description="content is required")
-        new_guide = Guide(user_id=user_id, content=content)
-        try:
-            db.session.add(new_guide)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({'error': str(e)}), 500
-        return redirect(url_for('get_guide', user_id=new_guide.id))
-    return render_template('add_guide.html', user_id=user_id)    """
-
 @app.route('/delete_user/<int:user_id>', methods=['GET', 'POST'])
 def delete_user(user_id):
     user = User.query.get(user_id)
@@ -247,6 +228,34 @@ def delete_user(user_id):
         return redirect(url_for('get_users'))
     return render_template('delete_user.html', user=user)
 
+@app.route('/update_user/<int:user_id>', methods=['GET', 'POST'])
+def update_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return abort(404, description="User not found")
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if not username and not password:
+            return abort(400, description="At least one of username or password must be provided")
+
+        if username:
+            user.username = username
+
+        if password:
+            user.password = password
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+        return redirect(url_for('get_user', id=user_id))
+
+    return render_template('update_user.html', user=user)
 
 @app.route('/add_guide/<int:user_id>', methods=['GET', 'POST'])
 def add_guide(user_id):
