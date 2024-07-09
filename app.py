@@ -105,6 +105,13 @@ def user_page(user_id):
         return abort(404, description="User not found")
     return render_template('home.html', user=user)
 
+@app.route('/map/<int:user_id>', methods=['GET', 'POST'])
+def map(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return abort(404, description="User not found")
+    return render_template('index.html', user=user)
+
 @app.route('/load_attractions', methods=['GET'])
 def load_attractions():
     with open('./data/attractions.json', 'r', encoding='utf-8') as f:
@@ -302,6 +309,11 @@ def get_guide(user_id):
         return jsonify({'error': 'No guides found for this user'}), 404
     return jsonify([{'id': guide.id, 'user_id': guide.user_id, 'content': guide.content} for guide in guides]), 200
 
+@app.route('/get_userprofiles', methods=['GET'])
+def get_userprofiles():
+    userprofiles = UserProfile.query.all()
+    userprofiles_list = [{'id': userprofile.id, 'userid': userprofile.user_id, 'bio': userprofile.bio} for userprofile in userprofiles]
+    return jsonify(userprofiles_list), 200
 
 if __name__ == '__main__':
     with app.app_context():
