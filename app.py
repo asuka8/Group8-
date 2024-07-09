@@ -9,6 +9,8 @@ from sqlalchemy import inspect
 from flask_cors import CORS
 from datetime import date
 from sqlalchemy.orm import relationship
+from sqlalchemy import event
+
 
 app = Flask(__name__, template_folder='Front/html')
 app.config.from_object(Config)
@@ -59,6 +61,16 @@ class Like_Dislike(db.Model):
     def __repr__(self):
         return f"<LikeDislike('{self.user_id}', '{self.guide_id}', '{self.status}')>"
 
+# Userと同時にUserprofileも作成
+@event.listens_for(User, 'after_insert')
+def create_user_profile(mapper, connection, target):
+    try:
+        new_profile = UserProfile(user_id=target.id)
+        connection.execute(UserProfile.__table__.insert(), {'user_id': target.id})
+    except Exception as e:
+        db.session.rollback()
+        raise e
+    
 @app.route('/')
 def index():
     return render_template('index.html')
