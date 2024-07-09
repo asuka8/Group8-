@@ -93,6 +93,13 @@ def user_page(user_id):
         return abort(404, description="User not found")
     return render_template('home.html', user=user)
 
+@app.route('/map/<int:user_id>', methods=['GET', 'POST'])
+def map(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return abort(404, description="User not found")
+    return render_template('index.html', user=user)
+
 @app.route('/load_attractions', methods=['GET'])
 def load_attractions():
     with open('./data/attractions.json', 'r', encoding='utf-8') as f:
