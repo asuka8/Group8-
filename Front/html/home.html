@@ -162,7 +162,7 @@
       <div class="page-content" id="profile-display">
         <h1>Profile Page</h1>
         <p id="display-id">ID: {{ user.username }}</p>
-        <p id="display-likes">アニョハセヨ。</p>
+        <p id="display-likes">{{ userprofile.bio }}</p>
         <button id="edit-button">編集</button>
       </div>
       <div class="page-content hidden" id="profile-edit-form">
@@ -171,7 +171,7 @@
           <label for="profile-id">ID</label>
           <input type="text" id="profile-id" placeholder="ID" value="{{ user.username }}">
           <label for="profile-likes">好きなもの</label>
-          <textarea id="profile-likes" placeholder="好きなもの">私はお肉が好きです。</textarea>
+          <textarea id="profile-likes" placeholder="好きなもの">{{ userprofile.bio }}</textarea>
           <button id="save-button">保存</button>
         </div>
       </div>

@@ -101,9 +101,12 @@ def home():
 @app.route('/user/<int:user_id>')
 def user_page(user_id):
     user = User.query.get(user_id)
+    userprofile = UserProfile.query.filter_by(user_id=user_id).first()
     if not user:
         return abort(404, description="User not found")
-    return render_template('home.html', user=user)
+    if not userprofile:
+        return abort(404, description="User not found")
+    return render_template('home.html', user=user, userprofile=userprofile)
 
 @app.route('/map/<int:user_id>', methods=['GET', 'POST'])
 def map(user_id):
