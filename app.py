@@ -108,6 +108,25 @@ def user_page(user_id):
         return abort(404, description="User not found")
     return render_template('home.html', user=user, userprofile=userprofile)
 
+@app.route('/user/<int:user_id>/update', methods=['POST'])
+def update_profile(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return abort(404, description="User not found")
+    userprofile = UserProfile.query.filter_by(user_id=user_id).first()
+    if not userprofile:
+        return abort(404, description="User profile not found")
+    
+    username = request.form['username']
+    bio = request.form['bio']
+    
+    user.username = username
+    userprofile.bio = bio
+    
+    db.session.commit()
+    
+    return redirect(url_for('user_page', user_id=user_id))
+
 @app.route('/map/<int:user_id>', methods=['GET', 'POST'])
 def map(user_id):
     user = User.query.get(user_id)
