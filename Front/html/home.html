@@ -156,6 +156,15 @@
     <div class="page" id="createguide">
       <h1>Create Guide Page</h1>
       <p>過去に作ったガイドを表示します。</p>
+      <div class="guide-list">
+        <ul>
+          {% for guide in guides %}
+            <li>{{ guide.title }} - {{ guide.description }}
+              <button onclick="playAudio('{{ guide.audio_url }}')">再生</button>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
       <div class="swipe-hint swipe-right">profile→</div>
     </div>
     <div class="page" id="profile">
@@ -186,6 +195,16 @@
     <div class="page" id="prefer">
       <h1>Prefer Page</h1>
       <p>評価したガイドを表示します。</p>
+      <div class="reviewed-guide-list">
+        <ul>
+          {% for guide in reviewed_guides %}
+            <li>
+              {{ guide.title }} - {{ guide.description }}
+              <button onclick="playAudio('{{ guide.audio_url }}')">再生</button>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
       <div class="swipe-hint swipe-left">←profile</div>
     </div>
   </div>
