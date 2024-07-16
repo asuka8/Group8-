@@ -169,8 +169,7 @@
                 ${name}<br>
                 <button class="btn btn-like ${likes > 0 ? '' : 'btn-inactive'}" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
                 <button class="btn btn-dislike ${dislikes > 0 ? '' : 'btn-inactive'}" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button><br>
-                <textarea id="desc-${lat}-${lng}" placeholder="Add description">${description}</textarea><br>
-                <button class="btn" onclick="addDescription(${lat}, ${lng})">Submit</button>
+                <textarea id="desc-${lat}-${lng}" placeholder="Add description">${description}</textarea>
             `);
             markers.push(marker);
         }
@@ -240,12 +239,14 @@
             currentAction = { lat, lng, action: 'like' };
             document.getElementById(`like-${lat}-${lng}`).classList.remove('btn-inactive');
             document.getElementById(`dislike-${lat}-${lng}`).classList.add('btn-inactive');
+            addDescription(lat, lng);
         }
 
         function dislikeMarker(lat, lng) {
             currentAction = { lat, lng, action: 'dislike' };
             document.getElementById(`dislike-${lat}-${lng}`).classList.remove('btn-inactive');
             document.getElementById(`like-${lat}-${lng}`).classList.add('btn-inactive');
+            addDescription(lat, lng);
         }
 
         function addDescription(lat, lng) {
@@ -273,13 +274,6 @@
                 console.log(data);
                 if (data.likes !== undefined && data.dislikes !== undefined) {
                     updateMarkerColor(lat, lng, data.likes, data.dislikes);
-                    if (action === 'like') {
-                        document.getElementById(`like-${lat}-${lng}`).classList.remove('btn-inactive');
-                        document.getElementById(`dislike-${lat}-${lng}`).classList.add('btn-inactive');
-                    } else if (action === 'dislike') {
-                        document.getElementById(`dislike-${lat}-${lng}`).classList.remove('btn-inactive');
-                        document.getElementById(`like-${lat}-${lng}`).classList.add('btn-inactive');
-                    }
                 }
                 fetchMarkers();
             })
@@ -334,7 +328,7 @@
                 })
                 .then(data => {
                     userMarkers = data;
-                    filterAttractions(); 
+                    filterAttractions();
                 })
                 .catch(error => {
                     console.error('Error fetching markers or attractions:', error);
