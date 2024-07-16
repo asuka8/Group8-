@@ -44,6 +44,7 @@ class Guide(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
+    title = db.Column(db.String(1024), default='')
     content = db.Column(db.String(1024), default='')
     created_at = db.Column(db.Date, default=date.today)
     updated_at = db.Column(db.Date, default=date.today, onupdate=date.today)
@@ -102,11 +103,12 @@ def home():
 def user_page(user_id):
     user = User.query.get(user_id)
     userprofile = UserProfile.query.filter_by(user_id=user_id).first()
+    guides = Guide.query.filter_by(user_id=user_id).all()
     if not user:
         return abort(404, description="User not found")
     if not userprofile:
         return abort(404, description="User not found")
-    return render_template('home.html', user=user, userprofile=userprofile)
+    return render_template('home.html', user=user, userprofile=userprofile, guides=guides)
 
 @app.route('/user/<int:user_id>/update', methods=['POST'])
 def update_profile(user_id):
@@ -316,10 +318,11 @@ def add_guide(user_id):
     if not user:
         return abort(404, description="User not found")
     if request.method == 'POST':
+        title = request.form.get('title')
         content = request.form.get('content')
         if content is None:
             return abort(400, description="content is required")
-        new_guide = Guide(user_id=user_id, content=content)
+        new_guide = Guide(user_id=user_id, title=title, content=content)
         try:
             db.session.add(new_guide)
             db.session.commit()
@@ -335,7 +338,7 @@ def get_guide(user_id):
     guides = Guide.query.filter_by(user_id=user_id).all()
     if guides is None:
         return jsonify({'error': 'No guides found for this user'}), 404
-    return jsonify([{'id': guide.id, 'user_id': guide.user_id, 'content': guide.content} for guide in guides]), 200
+    return jsonify([{'id': guide.id, 'user_id': guide.user_id, 'title': guide.title, 'content': guide.content} for guide in guides]), 200
 
 @app.route('/get_userprofiles', methods=['GET'])
 def get_userprofiles():

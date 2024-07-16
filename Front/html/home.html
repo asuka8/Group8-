@@ -159,7 +159,7 @@
       <div class="guide-list">
         <ul>
           {% for guide in guides %}
-            <li>{{ guide.title }} - {{ guide.description }}
+            <li>{{ guide.title }} - {{ guide.content }}
               <button onclick="playAudio('{{ guide.audio_url }}')">再生</button>
             </li>
           {% endfor %}
