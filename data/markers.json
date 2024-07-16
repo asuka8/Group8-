@@ -14,5 +14,13 @@
         "description": "吉田神社があります",
         "likes": 0,
         "dislikes": 0
+    },
+    {
+        "lat": 35.03208724964341,
+        "lng": 135.7870674133301,
+        "location_name": "1",
+        "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
+        "likes": 0,
+        "dislikes": 0
     }
 ]
