@@ -164,8 +164,9 @@ def get_markers():
     markers = load_markers()
     return jsonify(markers)
 
-@app.route('/add_marker', methods=['POST'])
-def add_marker():
+@app.route('/add_marker/<int:user_id>', methods=['POST'])
+def add_marker(user_id):
+    user = User.query.get(user_id)
     data = request.get_json()
     lat = data.get('lat')
     lng = data.get('lng')
@@ -177,11 +178,18 @@ def add_marker():
         if classification.classify_message(description) == 1:
             return abort(400, description="Junk content")
     
-    if lat is not None and lng is not None and location_name:
+    if lat is not None and lng is not None and location_name and user:
         marker = {'lat': lat, 'lng': lng, 'location_name': location_name, 'description': description, 'likes': 0, 'dislikes': 0}
         user_markers = load_markers()
         user_markers.append(marker)
         save_markers(user_markers)
+        new_guide = Guide(user_id=user_id, latitude=lat, longitude=lng, title=location_name, content=description)
+        try:
+            db.session.add(new_guide)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
         return jsonify({'message': 'Marker added successfully!'}), 200
     else:
         return jsonify({'error': 'Invalid data'}), 400

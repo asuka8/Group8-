@@ -344,7 +344,7 @@
 
             if (locationName) {
                 var description = prompt("Input description:");
-                fetch('/add_marker', {
+                fetch('/add_marker/{{ user.id }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
