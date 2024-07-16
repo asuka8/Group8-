@@ -2,7 +2,6 @@ import openai
 from data_processing import load_data, preprocess_data, save_vectorizer, load_vectorizer
 from model_training import train_model, evaluate_model, save_model, load_model
 
-# 设置API密钥
 openai.api_key = 'your-api-key-here'
 
 def classify_with_gpt3(text):
