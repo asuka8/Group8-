@@ -169,7 +169,7 @@
                 ${name}<br>
                 <button class="btn btn-like ${likes > 0 ? '' : 'btn-inactive'}" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
                 <button class="btn btn-dislike ${dislikes > 0 ? '' : 'btn-inactive'}" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button><br>
-                <textarea id="desc-${lat}-${lng}" placeholder="Add description">${description}</textarea>
+                <div id="desc-${lat}-${lng}" class="desc">${description}</div>
             `);
             markers.push(marker);
         }
@@ -250,7 +250,7 @@
         }
 
         function addDescription(lat, lng) {
-            var desc = document.getElementById(`desc-${lat}-${lng}`).value;
+            var desc = document.getElementById(`desc-${lat}-${lng}`).innerText;
             var action = currentAction.action || null;
             updateMarker(lat, lng, action, desc);
             currentAction = {};
