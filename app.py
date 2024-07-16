@@ -169,6 +169,11 @@ def add_marker():
     lng = data.get('lng')
     location_name = data.get('location_name')
     description = data.get('description', '')
+
+    if description:
+        from junk_classify_module import classification
+        if classification.classify_message(description) == 1:
+            return abort(400, description="Junk content")
     
     if lat is not None and lng is not None and location_name:
         marker = {'lat': lat, 'lng': lng, 'location_name': location_name, 'description': description, 'likes': 0, 'dislikes': 0}
@@ -186,6 +191,11 @@ def update_marker():
     lng = data.get('lng')
     action = data.get('action')
     description = data.get('description', '')
+
+    if description:
+        from junk_classify_module import classification
+        if classification.classify_message(description) == 1:
+            return abort(400, description="Junk content")
 
     user_markers = load_markers()
     attraction_found = False
@@ -295,6 +305,7 @@ def get_user(id):
 
 """@app.route('/add_guide/<int:user_id>', methods=['GET', 'POST'])
 def add_guide(user_id):
+    from junk_classify_module import classification
     user = User.query.get(user_id)
     if not user:
         return abort(404, description="User not found")
@@ -302,34 +313,50 @@ def add_guide(user_id):
         content = request.form.get('content')
         if content is None:
             return abort(400, description="content is required")
-        new_guide = Guide(user_id=user_id, content=content)
-        try:
-            db.session.add(new_guide)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({'error': str(e)}), 500
-        return redirect(url_for('get_guide', user_id=new_guide.id))
+        
+        if classification.classify_message(content) == 1:
+            return jsonify({'error': "Junk Input"}), 500
+
+        else:
+            new_guide = Guide(user_id=user_id, content=content)
+            try:
+                db.session.add(new_guide)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({'error': str(e)}), 500
+            return redirect(url_for('get_guide', user_id=new_guide.id))
+    
     return render_template('add_guide.html', user_id=user_id)    """
 
 @app.route('/add_guide/<int:user_id>', methods=['GET', 'POST'])
 def add_guide(user_id):
+    from junk_classify_module import classification
     user = User.query.get(user_id)
+
     if not user:
         return abort(404, description="User not found")
+    
     if request.method == 'POST':
         title = request.form.get('title')
         content = request.form.get('content')
+
         if content is None:
             return abort(400, description="content is required")
-        new_guide = Guide(user_id=user_id, title=title, content=content)
-        try:
-            db.session.add(new_guide)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({'error': str(e)}), 500
-        return redirect(url_for('get_guide', user_id=user_id))  # ここを修正
+
+        if classification.classify_message(content) == 1:
+            return abort(400, description="Junk content")
+
+        else:
+            new_guide = Guide(user_id=user_id, title=title, content=content)
+            try:
+                db.session.add(new_guide)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({'error': str(e)}), 500
+            return redirect(url_for('get_guide', user_id=user_id))  # ここを修正
+    
     return render_template('add_guide.html', user_id=user_id)    
 
 @app.route('/get_guide/<int:user_id>', methods=['GET'])
