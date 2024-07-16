@@ -160,7 +160,6 @@
         <ul>
           {% for guide in guides %}
             <li>{{ guide.title }} - {{ guide.content }}
-              <button onclick="playAudio('{{ guide.audio_url }}')">再生</button>
             </li>
           {% endfor %}
         </ul>
@@ -200,7 +199,6 @@
           {% for guide in reviewed_guides %}
             <li>
               {{ guide.title }} - {{ guide.description }}
-              <button onclick="playAudio('{{ guide.audio_url }}')">再生</button>
             </li>
           {% endfor %}
         </ul>
