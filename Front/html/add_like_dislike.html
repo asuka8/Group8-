@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Guide</title>
+</head>
+<body>
+    <h1>Add Guide</h1>
+    <form action="{{ url_for('add_like_dislike', user_id=user_id, guide_id=guide_id) }}" method="POST">
+        <label>Status:</label><br>
+        <input type="radio" id="none" name="status" value="None" required>
+        <label for="none">None</label><br>
+        <input type="radio" id="like" name="status" value="Like">
+        <label for="like">Like</label><br>
+        <input type="radio" id="dislike" name="status" value="Dislike">
+        <label for="dislike">Dislike</label><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from flask_migrate import Migrate
 #from model.models import User
-from sqlalchemy import inspect
+from sqlalchemy import inspect, UniqueConstraint
 from flask_cors import CORS
 from datetime import date
 from sqlalchemy.orm import relationship
@@ -58,6 +58,8 @@ class Like_Dislike(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     guide_id = db.Column(db.Integer, db.ForeignKey('guide.id'), nullable=False)
     status = db.Column(db.Integer, nullable=False, default = 0)
+    __table_args__ = (UniqueConstraint('user_id', 'guide_id', name='uix_user_guide'),)
+#見ただけという情報はいらないならば、statusを1, -1でLike, Dislikeとして扱う
 
     def __repr__(self):
         return f"<LikeDislike('{self.user_id}', '{self.guide_id}', '{self.status}')>"
@@ -372,6 +374,40 @@ def get_userprofiles():
     userprofiles = UserProfile.query.all()
     userprofiles_list = [{'id': userprofile.id, 'userid': userprofile.user_id, 'bio': userprofile.bio} for userprofile in userprofiles]
     return jsonify(userprofiles_list), 200
+
+@app.route('/add_like_dislike/<int:user_id>/<int:guide_id>', methods=['GET', 'POST'])
+def add_like_dislike(user_id, guide_id):
+    user = User.query.get(user_id)
+    guide = Guide.query.get(guide_id)
+    if not user:
+        return abort(404, description="User not found")
+    if not guide:
+        return abort(404, description="Guide not found")
+    if request.method == 'POST':
+        status = request.form.get('status')
+        if status is None:
+            return abort(400, description="status is required")
+        status_value = 0 if status == 'None' else 1 if status == 'Like' else -1
+        existing_like_dislike = Like_Dislike.query.filter_by(user_id=user_id, guide_id=guide_id).first()
+        if existing_like_dislike:
+            existing_like_dislike.status = status_value
+        else:
+            new_like_dislike = Like_Dislike(user_id=user_id, guide_id=guide_id, status=status_value)
+            db.session.add(new_like_dislike)
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+        return redirect(url_for('get_like_dislike', user_id=user_id, guide_id=guide_id))  # ここを修正
+    return render_template('add_like_dislike.html', user_id=user_id, guide_id=guide_id)  
+
+@app.route('/get_like_dislike/<int:user_id>/<int:guide_id>', methods=['GET'])
+def get_like_dislike(user_id, guide_id):
+    like_dislikes = Like_Dislike.query.filter_by(user_id=user_id).all()
+    if like_dislikes is None:
+        return jsonify({'error': 'No like_dislikes found for this user'}), 404
+    return jsonify([{'id': like_dislike.id, 'user_id': like_dislike.user_id, 'guide_id': like_dislike.guide_id, 'status': like_dislike.status} for like_dislike in like_dislikes]), 200
 
 if __name__ == '__main__':
     with app.app_context():

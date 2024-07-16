@@ -2,6 +2,7 @@ import openai
 from transformers import BertTokenizer, BertForSequenceClassification
 import torch
 import re
+import os
 
 api_key = 'your-api-key-here'
 openai.api_key = api_key
@@ -21,7 +22,22 @@ def classify_with_gpt3(text):
     )
     return int(response.choices[0].text.strip())
 
+def check_folder_exists(folder_a, folder_b):
+    folder_b_path = os.path.join(folder_a, folder_b)
+    
+    if os.path.isdir(folder_b_path):
+        return True
+    else: return False
+
 def classify_message(text, model_path='./junk_classify_module/bert_model', tokenizer_path='./junk_classify_module/bert_tokenizer'):
+    if check_folder_exists("./junk_classify_module/", "bert_model") == False:
+        from junk_classify_module.data_processing import load_data, split_data
+        from junk_classify_module.model_training import train_model, save_model
+        df = load_data('./junk_classify_module/data.json')
+        train_texts, val_texts, train_labels, val_labels = split_data(df)
+        model, tokenizer = train_model(train_texts, train_labels, val_texts, val_labels)
+        save_model(model, tokenizer)
+    
     text = text.strip('!@#$%^&*()_+-=[]{}|;:\'",.<>?/`~')
 
     from junk_classify_module.model_training import load_model
@@ -41,17 +57,6 @@ def classify_message(text, model_path='./junk_classify_module/bert_model', token
     return round(predictions)
 
 if __name__ == "__main__":
-    import os
-    path = "./junk_classify_module/"
-
-    if not os.path.isdir(os.path.join(path, "bert_model")):
-        from junk_classify_module.data_processing import load_data, split_data
-        from junk_classify_module.model_training import train_model, save_model
-        df = load_data('./junk_classify_module/data.json')
-        train_texts, val_texts, train_labels, val_labels = split_data(df)
-        model, tokenizer = train_model(train_texts, train_labels, val_texts, val_labels)
-        save_model(model, tokenizer)
-    
     text = "あなたは当選しました！お金を受け取るためにここをクリックしてください。"
     final_result = classify_message(text)
     print(f'Result: {final_result}')
