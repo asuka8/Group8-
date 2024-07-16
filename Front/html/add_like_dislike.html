@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Like/Dislike</title>
+</head>
+<body>
+    <form action="/add_like_dislike/{{ user_id }}/{{ guide_id }}" method="POST">
+        <label for="status">Status:</label>
+        <select id="status" name="status" required>
+            <option value="1">Like</option>
+            <option value="2">Dislike</option>
+        </select><br>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

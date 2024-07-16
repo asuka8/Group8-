@@ -52,6 +52,7 @@ class Guide(db.Model):
         return f"<Guide('{self.user_id}', '{self.content}')>"
    
 class Like_Dislike(db.Model):
+    __tablename__='like_dislike'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     guide_id = db.Column(db.Integer, db.ForeignKey('guide.id'), nullable=False)
@@ -365,7 +366,7 @@ def add_userprofile(user_id):
 @app.route('/get_userprofile/<int:user_id>', methods = ['GET'])
 def get_userprofile(user_id):
     userprofiles = UserProfile.query.filter_by(user_id=user_id).all()
-    if userprofiles is None:
+    if userprofiladdes is None:
         return jsonify({'error': 'No userprofiles found for this user'}), 404
     return jsonify([{'id':userprofile.id, 'user_id':userprofile.user_id, 'bio':userprofile.bio} for userprofile in userprofiles]), 200
 
@@ -413,6 +414,44 @@ def update_userprofile(user_id):
         return redirect(url_for('get_userprofile', user_id=user_id))
 
     return render_template('update_userprofile.html', user_id=user_id, bio=userprofile.bio)
+
+@app.route('/add_like_dislike/<int:user_id>/<int:guide_id>', methods=['GET', 'POST'])
+def add_like_dislike(user_id, guide_id):
+    user = User.query.get(user_id)
+    guide = Guide.query.get(guide_id)
+    if not user or not guide:
+        return abort(404, description="User or Guide not found")
+    if request.method == 'POST':
+        status = request.form.get('status')
+        if status not in {'1', '-1'}:
+            return jsonify({'error': 'Invalid status value'}), 400
+        existing_entry = Like_Dislike.query.filter_by(user_id=user_id, guide_id=guide_id).first()
+        if existing_entry:
+            return jsonify({'error': 'User has already rated this guide'}), 400
+        
+        new_like_dislike = Like_Dislike(user_id=user_id, guide_id=guide_id, status=int(status))
+        try:
+            db.session.add(new_like_dislike)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+        return redirect(url_for('get_likes_dislikes'))
+    return render_template('add_like_dislike.html', user_id=user_id, guide_id=guide_id)
+
+@app.route('/get_likes_dislikes', methods=['GET'])
+def get_likes_dislikes():
+    likes_dislikes = Like_Dislike.query.all()
+    result = [
+        {
+            'id': like_dislike.id,
+            'user_id': like_dislike.user_id,
+            'guide_id': like_dislike.guide_id,
+            'status': like_dislike.status
+        }
+        for like_dislike in likes_dislikes
+    ]
+    return jsonify(result), 200
 
 
 if __name__ == '__main__':
