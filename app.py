@@ -41,7 +41,7 @@ class UserProfile(db.Model):
     
 class Guide(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     title = db.Column(db.String(1024), default='')
@@ -194,13 +194,14 @@ def add_marker(user_id):
     else:
         return jsonify({'error': 'Invalid data'}), 400
 
-@app.route('/update_marker', methods=['POST'])
-def update_marker():
+@app.route('/update_marker/<int:user_id>', methods=['POST'])
+def update_marker(user_id):
+    user = User.query.get(user_id)
     data = request.get_json()
     lat = data.get('lat')
     lng = data.get('lng')
     action = data.get('action')
-    description = data.get('description', '')
+    description = data.get('description', '')  #マップから文章変更はできないので、いらないかも
 
     if description:
         from junk_classify_module import classification
@@ -221,7 +222,24 @@ def update_marker():
             if description:
                 marker['description'] = description
             save_markers(user_markers)
-            return jsonify({'message': 'Marker updated successfully!', 'likes': marker['likes'], 'dislikes': marker['dislikes']}), 200
+            if user:
+                guide = Guide.query.filter_by(latitude=lat, longitude=lng).first()
+                existing_like_dislike = Like_Dislike.query.filter_by(user_id=user_id, guide_id=guide.id).first()
+                if action == 'like':
+                    status_value = 1
+                elif action == 'dislike':
+                    status_value = -1
+                if existing_like_dislike:
+                    existing_like_dislike.status = status_value
+                else:
+                    new_like_dislike = Like_Dislike(user_id=user_id, guide_id=guide.id, status=status_value)
+                    db.session.add(new_like_dislike) 
+                try:
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    return jsonify({'error': str(e)}), 500
+                return jsonify({'message': 'Marker updated successfully!', 'likes': marker['likes'], 'dislikes': marker['dislikes']}), 200
 
     if not attraction_found:
         attractions = load_attractions()
@@ -231,7 +249,7 @@ def update_marker():
                     'lat': lat,
                     'lng': lng,
                     'location_name': attraction['name'],
-                    'description': description,
+                    'description': attraction['description'],
                     'likes': 1 if action == 'like' else 0,
                     'dislikes': 1 if action == 'dislike' else 0
                 }
@@ -375,7 +393,15 @@ def get_guide(user_id):
     guides = Guide.query.filter_by(user_id=user_id).all()
     if guides is None:
         return jsonify({'error': 'No guides found for this user'}), 404
-    return jsonify([{'id': guide.id, 'user_id': guide.user_id, 'title': guide.title, 'content': guide.content} for guide in guides]), 200
+    return jsonify([{'id': guide.id, 'user_id': guide.user_id, 'title': guide.title, 'content': guide.content, 'latitude': guide.latitude, 'longitude': guide.longitude} for guide in guides]), 200
+
+@app.route('/get_guides', methods=['GET'])
+def get_guides():
+    #guide = Guide.query.get(user_id)    #ガイドのidになってしまっている
+    guides = Guide.query.all()
+    if guides is None:
+        return jsonify({'error': 'No guides found for this user'}), 404
+    return jsonify([{'id': guide.id, 'user_id': guide.user_id, 'title': guide.title, 'content': guide.content, 'latitude': guide.latitude, 'longitude': guide.longitude} for guide in guides]), 200
 
 @app.route('/get_userprofiles', methods=['GET'])
 def get_userprofiles():
@@ -410,8 +436,8 @@ def add_like_dislike(user_id, guide_id):
         return redirect(url_for('get_like_dislike', user_id=user_id, guide_id=guide_id))  # ここを修正
     return render_template('add_like_dislike.html', user_id=user_id, guide_id=guide_id)  
 
-@app.route('/get_like_dislike/<int:user_id>/<int:guide_id>', methods=['GET'])
-def get_like_dislike(user_id, guide_id):
+@app.route('/get_like_dislike/<int:user_id>', methods=['GET'])
+def get_like_dislike(user_id):
     like_dislikes = Like_Dislike.query.filter_by(user_id=user_id).all()
     if like_dislikes is None:
         return jsonify({'error': 'No like_dislikes found for this user'}), 404

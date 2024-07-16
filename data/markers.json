@@ -20,7 +20,7 @@
         "lng": 135.7870674133301,
         "location_name": "1",
         "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
-        "likes": 0,
+        "likes": 1,
         "dislikes": 0
     },
     {
@@ -59,6 +59,110 @@
         "lat": 35.03043563409785,
         "lng": 135.78397750854495,
         "location_name": "1111",
+        "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
+        "likes": 0,
+        "dislikes": 1
+    },
+    {
+        "lat": 35.03171146160976,
+        "lng": 135.77727579453497,
+        "location_name": "友達の家",
+        "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
+        "likes": 0,
+        "dislikes": 1
+    },
+    {
+        "lat": 35.023611,
+        "lng": 135.800556,
+        "location_name": "哲学の道",
+        "description": "",
+        "likes": 0,
+        "dislikes": 1
+    },
+    {
+        "lat": 35.027222,
+        "lng": 135.798283,
+        "location_name": "銀閣寺",
+        "description": "",
+        "likes": 1,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.028056,
+        "lng": 135.798056,
+        "location_name": "銀閣寺道",
+        "description": "",
+        "likes": 0,
+        "dislikes": 1
+    },
+    {
+        "lat": 35.025,
+        "lng": 135.793333,
+        "location_name": "法然院",
+        "description": "",
+        "likes": 1,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.015833,
+        "lng": 135.783611,
+        "location_name": "京都市動物園",
+        "description": "",
+        "likes": 0,
+        "dislikes": 1
+    },
+    {
+        "lat": 35.015111,
+        "lng": 135.783374,
+        "location_name": "平安神宮",
+        "description": "",
+        "likes": 1,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.022702,
+        "lng": 135.762706,
+        "location_name": "京都御所",
+        "description": "京都御所は京都市上京区にある、かつての皇居。広大な敷地内には宮殿や庭園があり、一般公開も行われている。",
+        "likes": 1,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.011667,
+        "lng": 135.768333,
+        "location_name": "京の冬の旅",
+        "description": "京の冬の旅は京都市内で冬季に行われる観光キャンペーンで、特別公開される寺院や美術館などが多数ある。",
+        "likes": 1,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.011667,
+        "lng": 135.771944,
+        "location_name": "京の七夕",
+        "description": "京の七夕は毎年8月に京都市内で開催されるイベントで、鴨川や堀川を中心にライトアップや願い事の短冊が飾られる。",
+        "likes": 1,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.004722,
+        "lng": 135.772222,
+        "location_name": "祇園祭",
+        "description": "祇園祭は京都市内で毎年7月に開催される日本三大祭の一つ。山鉾巡行や宵山など多彩な行事が行われ、多くの観光客が訪れる。",
+        "likes": 0,
+        "dislikes": 1
+    },
+    {
+        "lat": 35.015833,
+        "lng": 135.777778,
+        "location_name": "五山送り火",
+        "description": "五山送り火は毎年8月16日に京都市内で行われる伝統行事で、五つの山に大文字や鳥居形などの火が灯る。",
+        "likes": 0,
+        "dislikes": 1
+    },
+    {
+        "lat": 35.03438891351302,
+        "lng": 135.77968597412112,
+        "location_name": "家",
         "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
         "likes": 0,
         "dislikes": 0

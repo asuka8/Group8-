@@ -257,7 +257,7 @@
         }
 
         function updateMarker(lat, lng, action, description) {
-            fetch('/update_marker', {
+            fetch('/update_marker/{{ user.id }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
