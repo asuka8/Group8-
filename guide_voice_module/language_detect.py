@@ -8,7 +8,7 @@ def detect_language(text):
         elif lang == 'ja':
             return "ja"
         elif lang == 'zh-cn' or lang == 'zh-tw':
-            return "zn"
+            return "zh"
         else:
             return "Unknown language"
     except Exception as e:
