@@ -6,5 +6,13 @@
         "description": null,
         "likes": 2,
         "dislikes": 1
+    },
+    {
+        "lat": 35.02688052745621,
+        "lng": 135.78722063433582,
+        "location_name": "吉田山",
+        "description": "吉田神社があります",
+        "likes": 0,
+        "dislikes": 0
     }
 ]

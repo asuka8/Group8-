@@ -1,7 +1,6 @@
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
 import json
-import joblib
+from sklearn.model_selection import train_test_split
 
 def load_data(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
@@ -9,16 +8,7 @@ def load_data(json_path):
     df = pd.DataFrame(data)
     return df
 
-def preprocess_data(df):
+def split_data(df, test_size=0.2, random_state=42):
     X = df['text']
     y = df['label']
-    vectorizer = TfidfVectorizer()
-    X_tfidf = vectorizer.fit_transform(X)
-    return X_tfidf, y, vectorizer
-
-def save_vectorizer(vectorizer, path='vectorizer.pkl'):
-    joblib.dump(vectorizer, path)
-    print('Vectorizer saved to', path)
-
-def load_vectorizer(path='vectorizer.pkl'):
-    return joblib.load(path)
+    return train_test_split(X, y, test_size=test_size, random_state=random_state)

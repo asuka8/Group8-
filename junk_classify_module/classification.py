@@ -1,8 +1,16 @@
 import openai
-from data_processing import load_data, preprocess_data, save_vectorizer, load_vectorizer
-from model_training import train_model, evaluate_model, save_model, load_model
+from transformers import BertTokenizer, BertForSequenceClassification
+import torch
+import re
 
-openai.api_key = 'your-api-key-here'
+api_key = 'your-api-key-here'
+openai.api_key = api_key
+
+def find_first_integer(s):
+    match = re.search(r'\d+', s)
+    if match:
+        return int(match.group())
+    return None
 
 def classify_with_gpt3(text):
     response = openai.Completion.create(
@@ -13,41 +21,41 @@ def classify_with_gpt3(text):
     )
     return int(response.choices[0].text.strip())
 
-def classify_message(text, model_path='spam_classifier.pkl', vectorizer_path='vectorizer.pkl'):
-    clf = load_model(model_path)
-    vectorizer = load_vectorizer(vectorizer_path)
+def classify_message(text, model_path='./junk_classify_module/bert_model', tokenizer_path='./junk_classify_module/bert_tokenizer'):
+    text = text.strip('!@#$%^&*()_+-=[]{}|;:\'",.<>?/`~')
+
+    from junk_classify_module.model_training import load_model
+    model, tokenizer = load_model(model_path, tokenizer_path)
     
-    text_tfidf = vectorizer.transform([text])
-    lr_classification = clf.predict(text_tfidf)[0]
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+    outputs = model(**inputs)
+
+    if api_key == 'your-api-key-here':
+        predictions = torch.argmax(outputs.logits, dim=-1).item() # BERT
     
-    #gpt3_classification = classify_with_gpt3(text)
-    
-    #final_classification = (lr_classification + gpt3_classification) // 2
-    return int(lr_classification)
+    else:
+        predictions = classify_with_gpt3(text) # GPT
+        
+    if isinstance(predictions, str): predictions = find_first_integer(predictions)
+    print(predictions)
+    return round(predictions)
 
 if __name__ == "__main__":
-    # # Load Training
-    # df = load_data('data.json')
+    import os
+    path = "./junk_classify_module/"
+
+    if not os.path.isdir(os.path.join(path, "bert_model")):
+        from junk_classify_module.data_processing import load_data, split_data
+        from junk_classify_module.model_training import train_model, save_model
+        df = load_data('./junk_classify_module/data.json')
+        train_texts, val_texts, train_labels, val_labels = split_data(df)
+        model, tokenizer = train_model(train_texts, train_labels, val_texts, val_labels)
+        save_model(model, tokenizer)
     
-    # # Data Preprocessing
-    # X, y, vectorizer = preprocess_data(df)
-    # save_vectorizer(vectorizer)
-    
-    # # Model Training
-    # clf = train_model(X, y)
-    
-    # # Evaluation
-    # accuracy = evaluate_model(clf, X, y)
-    # print(f'5-Fold Cross Validation Accuracy: {accuracy}')
-    
-    # # Save model
-    # save_model(clf)
-    
-    # Add model (0: not spam, 1: spam)
     text = "あなたは当選しました！お金を受け取るためにここをクリックしてください。"
     final_result = classify_message(text)
-    print(f'Results: {final_result}')
+    print(f'Result: {final_result}')
 
-    text = "京都の金閣寺は美しい庭園と黄金の建物で知られています。"
+    text = "京都の町は綺麗です"
     final_result = classify_message(text)
-    print(f'Results: {final_result}')
+    print(f'Result: {final_result}')
