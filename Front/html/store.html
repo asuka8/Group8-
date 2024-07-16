@@ -1,12 +1,119 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-    content="width=device-width, initial-scale=1.0">
-    <title>読まれたガイドのリスト</title>
-<body>
-    <h1>読まれたガイド</h1>
-</body>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ガイド一覧</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #F2F2F2;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.8em; /* スマホ用に少し小さめに */
+  }
+  #store-list {
+    width: 95%; /* 画面幅いっぱいに */
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 15px; /* スマホ用に少し狭く */
+  }
+  .store-item {
+    list-style: none;
+    padding: 10px 15px; /* スマホ用に少し狭く */
+    border-bottom: 1px solid #eee;
+    font-size: 1em; /* スマホ用に少し小さめに */
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    transition: background-color 0.3s ease;
+  }
+  .store-item:last-child {
+    border-bottom: none;
+  }
+  .store-name {
+    flex-grow: 1;
+    margin-right: 10px; /* ボタンとの間隔 */
+  }
+  .button-container {
+    display: flex; /* ボタンを横並びに */
+  }
+  .like-button,
+  .dislike-button {
+    margin: 0 3px; /* ボタン間のマージン */
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.9em; /* スマホ用に少し小さめに */
+    cursor: pointer;
+  }
+  .like-button {
+    background-color: #4CAF50;
+    color: white;
+  }
+  .dislike-button {
+    background-color: #F44336;
+    color: white;
+  }
+  .liked {
+    background-color: #E6FFE6;
+  }
+  .disliked {
+    background-color: #FFE6E6;
+  }
+</style>
 </head>
+<body>
+  <h1>読まれたガイド一覧</h1>
+  <ul id="store-list"></ul>
+  <script>
+    const guideNames = ["ガイド1", "ガイド2", "ガイド3", "ガイド4"];
+    const guideList = document.getElementById("store-list");
+    guideNames.forEach(name => {
+      const listItem = document.createElement("li");
+      listItem.classList.add("store-item"); // store-itemクラスを追加
+      // ガイド名表示部分
+      const nameElement = document.createElement("span");
+      nameElement.textContent = name;
+      nameElement.classList.add("store-name");
+      listItem.appendChild(nameElement);
+      // ボタンを配置するためのコンテナ
+      const buttonContainer = document.createElement("div");
+      buttonContainer.classList.add("button-container");
+      // Likeボタン
+      const likeButton = document.createElement("button");
+      likeButton.textContent = "Like";
+      likeButton.classList.add("like-button");
+      likeButton.addEventListener("click", () => {
+        listItem.classList.toggle("liked");
+        listItem.classList.remove("disliked"); // Dislike状態を解除
+        // TODO: Like情報をデータベースに送信
+      });
+      buttonContainer.appendChild(likeButton);
+      // Dislikeボタン
+      const dislikeButton = document.createElement("button");
+      dislikeButton.textContent = "Dislike";
+      dislikeButton.classList.add("dislike-button");
+      dislikeButton.addEventListener("click", () => {
+        listItem.classList.toggle("disliked");
+        listItem.classList.remove("liked"); // Like状態を解除
+        // TODO: Dislike情報をデータベースに送信
+      });
+      buttonContainer.appendChild(dislikeButton);
+      // ボタンコンテナをリストアイテムに追加
+      listItem.appendChild(buttonContainer);
+      guideList.appendChild(listItem);
+    });
+  </script>
+</body>
 </html>
+
+
+
