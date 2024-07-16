@@ -170,23 +170,6 @@ def tables():
     tables = inspector.get_table_names()
     return jsonify(tables)
 
-'''@app.route('/add_user', methods=['POST'])
-def add_user():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-
-    if username is None or password is None:
-        return jsonify({'error': 'Invalid data'}), 400
-
-    if User.query.filter_by(username=username).first() is not None:
-        return jsonify({'error': 'User already exists'}), 400
-
-    new_user = User(username=username, password=password)
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({'message': 'User added successfully!'}), 201'''
-
 @app.route('/add_user_page')
 def add_user_page():
     return render_template('add_user.html')
@@ -419,39 +402,35 @@ def update_userprofile(user_id):
 def add_like_dislike(user_id, guide_id):
     user = User.query.get(user_id)
     guide = Guide.query.get(guide_id)
-    if not user or not guide:
-        return abort(404, description="User or Guide not found")
+    if not user:
+        return abort(404, description="User not found")
+    if not guide:
+        return abort(404, description="Guide not found")
     if request.method == 'POST':
         status = request.form.get('status')
-        if status not in {'1', '-1'}:
-            return jsonify({'error': 'Invalid status value'}), 400
-        existing_entry = Like_Dislike.query.filter_by(user_id=user_id, guide_id=guide_id).first()
-        if existing_entry:
-            return jsonify({'error': 'User has already rated this guide'}), 400
-        
-        new_like_dislike = Like_Dislike(user_id=user_id, guide_id=guide_id, status=int(status))
-        try:
+        if status is None:
+            return abort(400, description="status is required")
+        status_value = 0 if status == 'None' else 1 if status == 'Like' else -1
+        existing_like_dislike = Like_Dislike.query.filter_by(user_id=user_id, guide_id=guide_id).first()
+        if existing_like_dislike:
+            existing_like_dislike.status = status_value
+        else:
+            new_like_dislike = Like_Dislike(user_id=user_id, guide_id=guide_id, status=status_value)
             db.session.add(new_like_dislike)
+        try:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
-        return redirect(url_for('get_likes_dislikes'))
-    return render_template('add_like_dislike.html', user_id=user_id, guide_id=guide_id)
+        return redirect(url_for('get_like_dislike', user_id=user_id, guide_id=guide_id))  # ここを修正
+    return render_template('add_like_dislike.html', user_id=user_id, guide_id=guide_id)  
 
-@app.route('/get_likes_dislikes', methods=['GET'])
-def get_likes_dislikes():
-    likes_dislikes = Like_Dislike.query.all()
-    result = [
-        {
-            'id': like_dislike.id,
-            'user_id': like_dislike.user_id,
-            'guide_id': like_dislike.guide_id,
-            'status': like_dislike.status
-        }
-        for like_dislike in likes_dislikes
-    ]
-    return jsonify(result), 200
+@app.route('/get_like_dislike/<int:user_id>/<int:guide_id>', methods=['GET'])
+def get_like_dislike(user_id, guide_id):
+    like_dislikes = Like_Dislike.query.filter_by(user_id=user_id).all()
+    if like_dislikes is None:
+        return jsonify({'error': 'No like_dislikes found for this user'}), 404
+    return jsonify([{'id': like_dislike.id, 'user_id': like_dislike.user_id, 'guide_id': like_dislike.guide_id, 'status': like_dislike.status} for like_dislike in like_dislikes]), 200
 
 
 if __name__ == '__main__':
