@@ -1,8 +1,8 @@
-"""Initial migration
+"""Added language column
 
-Revision ID: 8392e6ec2459
+Revision ID: 60562683731a
 Revises: 
-Create Date: 2024-07-16 15:56:50.525008
+Create Date: 2024-07-18 16:47:38.942932
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8392e6ec2459'
+revision = '60562683731a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,7 +27,7 @@ def upgrade():
     )
     op.create_table('guide',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('latitude', sa.Float(), nullable=True),
     sa.Column('longitude', sa.Float(), nullable=True),
     sa.Column('title', sa.String(length=1024), nullable=True),
@@ -41,6 +41,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('bio', sa.String(length=1024), nullable=True),
+    sa.Column('language', sa.String(length=2), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')

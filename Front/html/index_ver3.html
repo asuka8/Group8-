@@ -100,10 +100,12 @@
     <div class="bottom-left-buttons">
         <button id="logout-button">ログアウト</button>
         <button onclick="window.location.href='/user/{{ user.id }}'">ホームへ</button>
+        <button id="toggleButton">Start Voice Guide</button>
     </div>
 
     <!-- Jinja2の変数をデータ属性として埋め込む -->
     <div id="user-data" data-user='{{ user_json|tojson|safe }}'></div>
+    <div id="userprofile-data" data-userprofile='{{ userprofile|tojson|safe }}'></div>
     <div id="guides-data" data-guides='{{ guides|tojson|safe }}'></div>  <!-- New -->
     <div id="ld-data" data-like-dislike='{{ like_dislike|tojson|safe }}'></div> <!-- New -->
 
@@ -111,6 +113,7 @@
     <script>
         // HTML要素のデータ属性からPythonの変数をJavaScriptに渡す
         var userJson = JSON.parse(document.getElementById('user-data').getAttribute('data-user'));
+        var userprofile = JSON.parse(document.getElementById('userprofile-data').getAttribute('data-userprofile'));
         var guides = JSON.parse(document.getElementById('guides-data').getAttribute('data-guides')); // New
         var likeDislikes = JSON.parse(document.getElementById('ld-data').getAttribute('data-like-dislike')); // New
         var userLikeDislikes = likeDislikes.filter(ld => ld.user_id === userJson.id);
@@ -378,6 +381,121 @@
                 });
             }
         });
+
+        //こっから、ボタンを追加したversion
+        document.addEventListener('DOMContentLoaded', (event) => {
+            loginUser();
+        });
+
+        let intervalId;
+        let isRunning = false;
+        let totalRunTime = 0;
+        const maxRunTime = 5 * 60 * 1000; // 5分
+
+        
+        document.getElementById('toggleButton').addEventListener('click', () => {
+            if (isRunning) {
+                clearInterval(intervalId);
+                isRunning = false;
+                document.getElementById('toggleButton').textContent = 'Start Voice Guide';
+                console.log('fetchGuideVoiceの呼び出しを一時停止しました。');
+            } else {
+                // 初回の呼び出しを10秒後に設定
+                setTimeout(() => {
+                    fetchGuideVoice();
+                    console.log('fetchGuideVoice1')
+                    totalRunTime += 10000; // 初回の呼び出し時間を加算
+
+                    // その後の呼び出しを40秒ごとに設定
+                    intervalId = setInterval(() => {
+                        fetchGuideVoice();
+                        console.log('fetchGuideVoice1')
+                        totalRunTime += 40000; // 40秒ごとに呼び出し
+                        if (totalRunTime >= maxRunTime) {
+                            clearInterval(intervalId);
+                            isRunning = false;
+                            document.getElementById('toggleButton').textContent = 'Start Voice Guide';
+                            console.log('fetchGuideVoiceの呼び出しを完全に停止しました。');
+                        }
+                    }, 40000);
+                }, 10000); // 初回の呼び出しを10秒後に設定
+
+                isRunning = true;
+                document.getElementById('toggleButton').textContent = 'Pause Voice Guide';
+                console.log('fetchGuideVoiceの呼び出しを開始しました。');
+            }
+        });
+
+        
+
+        function loginUser() {
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const { latitude, longitude } = position.coords;
+
+                    fetch('/reco', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            //user_id,
+                            user_id: userJson.id,
+                            latitude,
+                            longitude,
+                            //user_description,
+                            //like_dislike: user_like_dislike
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Error:', data.error);
+                        } else {
+                            console.log('Response:', data);
+                            // Handle the response accordingly (e.g., update UI with the response)
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }, error => {
+                    console.error('Error getting location:', error);
+                });
+            } else {
+                console.error('Geolocation is not supported by this browser.');
+            }
+        }
+
+        function fetchGuideVoice() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const { latitude, longitude } = position.coords;
+
+                    fetch('/guide_voice', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ latitude, longitude, userLang: userprofile.language, user_id: userJson.id }), // 必要に応じてuserLangを変更 //userid追加
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Error:', data.error);
+                        } else {
+                            console.log('Response:', data);
+                            // Handle the response accordingly (e.g., update UI with the response)
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }, error => {
+                    console.error('Error getting location:', error);
+                });
+            } else {
+                console.error('Geolocation is not supported by this browser.');
+            }
+        }
+
     </script>
 </body>
 </html>

@@ -42,6 +42,15 @@ class UserProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
     bio = db.Column(db.String(1024), default='')
+    language = db.Column(db.String(2), nullable=False, default='jp')  # 言語情報を追加
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'bio': self.bio,
+            'language': self.language,
+        }
 
     def __repr__(self):
         return f"<UserProfile('{self.user_id}', '{self.bio}')>"
@@ -93,7 +102,7 @@ class Like_Dislike(db.Model):
 def index():
     return render_template('index.html')'''
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
@@ -144,9 +153,11 @@ def update_profile(user_id):
     
     username = request.form['username']
     bio = request.form['bio']
+    language = request.form['language']
     
     user.username = username
     userprofile.bio = bio
+    userprofile.language = language
     
     db.session.commit()
     
@@ -164,14 +175,16 @@ def map(user_id):
 @app.route('/map_ver2/<int:user_id>', methods=['GET', 'POST'])
 def map_ver2(user_id):
     user = User.query.get(user_id)
+    userprofile = UserProfile.query.filter_by(user_id=user_id).first()
     guides = Guide.query.all()
     like_dislike = Like_Dislike.query.filter_by(user_id=user_id).all()
     if not user:
         return abort(404, description="User not found")
     user_dict = user.to_dict()  # Convert object to dict
+    userprofile_dict = userprofile.to_dict()  # Convert object to dict
     guides_dict = [guide.to_dict() for guide in guides]  # Convert objects to dicts
     like_dislike_dict = [ld.to_dict() for ld in like_dislike]  # Convert objects to dicts
-    return render_template('index_ver3.html', user=user, user_json=user_dict, guides=guides_dict, like_dislike=like_dislike_dict)
+    return render_template('index_ver3.html', user=user, userprofile=userprofile_dict, user_json=user_dict, guides=guides_dict, like_dislike=like_dislike_dict)
 
 @app.route('/get_all_data', methods=['GET'])
 def get_all_data():
@@ -479,7 +492,7 @@ def get_guides():
 @app.route('/get_userprofiles', methods=['GET'])
 def get_userprofiles():
     userprofiles = UserProfile.query.all()
-    userprofiles_list = [{'id': userprofile.id, 'userid': userprofile.user_id, 'bio': userprofile.bio} for userprofile in userprofiles]
+    userprofiles_list = [{'id': userprofile.id, 'userid': userprofile.user_id, 'bio': userprofile.bio, 'lang': userprofile.language} for userprofile in userprofiles]
     return jsonify(userprofiles_list), 200
 
 @app.route('/add_like_dislike/<int:user_id>/<int:guide_id>', methods=['GET', 'POST'])
@@ -515,6 +528,141 @@ def get_like_dislike(user_id):
     if like_dislikes is None:
         return jsonify({'error': 'No like_dislikes found for this user'}), 404
     return jsonify([{'id': like_dislike.id, 'user_id': like_dislike.user_id, 'guide_id': like_dislike.guide_id, 'status': like_dislike.status} for like_dislike in like_dislikes]), 200
+
+# 以下、読み上げ機能部分
+# ユーザーごとに読み上げたガイドをトラッキングする辞書
+read_guides_by_user = {}
+
+@app.route('/guide_voice', methods=['POST'])
+def guide_voice():
+    from guide_voice_module import voice
+    from guide_voice_module import language_detect
+    from guide_voice_module import translation_gpt
+    from geopy.distance import geodesic
+
+    data = request.get_json()
+    current_lat = data.get('latitude')
+    current_lng = data.get('longitude')
+    user_id = data.get('user_id')
+    userLang = data.get('userLang')
+    #userLang = 'en'
+
+
+    if current_lat is None or current_lng is None:
+        return jsonify({'error': 'Latitude and longitude are required'}), 400
+
+    recommended_spots = recommended_spots_by_user[user_id]
+    #print(recommended_spots)
+
+    # 初めてのユーザーの場合、読み上げ済みガイドリストを作成
+    if user_id not in read_guides_by_user:
+        read_guides_by_user[user_id] = []
+
+    read_guides = read_guides_by_user[user_id]
+
+    # 現在位置から最も近いガイドを見つける
+    closest_guide = None
+    min_distance = float('inf')
+    current_location = (current_lat, current_lng)
+
+    for spot in recommended_spots:
+        #print(spot)
+        if spot['name'] in read_guides:
+            continue
+
+        guide_location = (spot['lat'], spot['lng'])
+        distance = geodesic(current_location, guide_location).meters
+        if distance < min_distance:
+            min_distance = distance
+            closest_guide = spot
+            #print(closest_guide)
+
+    if closest_guide is None:
+        return jsonify({'error': 'No new guides found'}), 404
+
+    text = closest_guide['description']
+
+    if language_detect.detect_language(text) == userLang:
+        voice.text_to_speech(text, userLang)
+        read_guides.append(closest_guide['name'])
+        return jsonify({'message': 'Text processed without translation', 'guide': text})
+
+    else:
+        print("different language")
+        prompt = f"Help me translate the sentence into '{userLang}'. Directly respond with the translation without any additional text.\\n{text}"
+
+        # Place GPT API key here
+        Translation = translation_gpt.Agent(model='gpt-4o', api_key="sk-proj-iVLzb4XmpgjatOIsfjCUT3BlbkFJWu6FAh5ZMJA0Drfs8Rth")
+        response = Translation.communicate(prompt)
+
+        voice.text_to_speech(response, userLang)
+        read_guides.append(closest_guide['name'])
+        return jsonify({'translated_text': response, 'guide': response})
+
+# グローバル変数としてユーザーごとの推薦観光地リストを管理
+recommended_spots_by_user = {}
+
+#attractionsからではなく、Guideからデータを取ってくる。
+def get_guide_data():
+    guides = Guide.query.all()
+    # フィールド名を変換する
+    guides_list = [
+        {
+            'name': guide.title,
+            'description': guide.content,
+            'lat': guide.latitude,
+            'lng': guide.longitude
+        }
+        for guide in guides
+    ]
+    return guides_list
+
+@app.route('/reco', methods=['POST'])
+def reco():
+    from recommendation_module import recommendation
+    from recommendation_module import user_profile_feature_extract
+    import os
+
+    data = request.get_json()
+    user_id = data.get('user_id')
+    print("useridは", user_id)
+    user = User.query.filter_by(id=user_id).first()
+    user_description = user.userprofile.bio
+    print(user_description)
+    print(type(user_description))
+    like_dislike_records = user.like_dislike
+    print(like_dislike_records)
+
+    # データをuser_like_dislike形式に変換
+    #そのユーザーのものを代入
+    user_like_dislike = {}
+    for record in like_dislike_records:
+        guide = Guide.query.filter_by(id=record.guide_id).first()
+        if guide:
+            user_like_dislike[guide.title] = True if record.status == 1 else False
+
+    print(user_like_dislike)
+
+    # ユーザープロフィールと位置情報を用いて推薦された観光地を取得
+    user_location = {'lng': data.get('longitude'), 'lat': data.get('latitude')}
+    user_interests = user_profile_feature_extract.extract_interests(user_description, user_profile_feature_extract.INTEREST_CATEGORIES)
+
+    user_profile_me = {
+        'interests': user_interests,
+        'like_dislike': user_like_dislike
+    }
+
+    # データベースからガイド情報を取得
+    guide_data = get_guide_data()
+
+    recommended_spots = recommendation.recommend_spots(user_location, user_profile_me, guide_data)
+
+    # 推薦された観光地をユーザーごとのリストに保存
+    recommended_spots_by_user[user_id] = recommended_spots
+
+    print('おすすめスポット:',recommended_spots)
+
+    return jsonify({'message': 'User logged in and recommendations calculated', 'recommended_spots': recommended_spots})
 
 if __name__ == '__main__':
     with app.app_context():

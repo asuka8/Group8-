@@ -87,6 +87,16 @@
     .swipe-right {
       right: 10px;
     }
+    .select-container {
+      width: 80%;
+    }
+
+    .select-container select {
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      margin: 10px 0;
+    }
   </style>
   <script>
     const swipeThreshold = 60;
@@ -169,6 +179,15 @@
       <div class="page-content" id="profile-display">
         <h1>Profile Page</h1>
         <p id="display-id">ID: {{ user.username }}</p>
+        <p id="display-language">言語: 
+          {% if userprofile.language == 'jp' %}
+              日本語
+          {% elif userprofile.language == 'en' %}
+              English
+          {% elif userprofile.language == 'zh' %}
+              中文
+          {% endif %}
+        </p>
         <p id="display-likes">{{ userprofile.bio }}</p>
         <button id="edit-button">編集</button>
       </div>
@@ -178,6 +197,14 @@
               <div class="edit-form">
                   <label for="profile-id">ID</label>
                   <input type="text" id="profile-id" name="username" placeholder="ID" value="{{ user.username }}">
+                  <div class="select-container">
+                    <label for="profile-language">言語</label>
+                    <select id="profile-language" name="language">
+                        <option value="jp" {% if userprofile.language == 'jp' %}selected{% endif %}>日本語</option>
+                        <option value="en" {% if userprofile.language == 'en' %}selected{% endif %}>English</option>
+                        <option value="zh" {% if userprofile.language == 'zh' %}selected{% endif %}>中文</option>
+                    </select>
+                  </div>
                   <label for="profile-likes">好きなもの</label>
                   <textarea id="profile-likes" name="bio" placeholder="好きなもの">{{ userprofile.bio }}</textarea>
                   <button type="submit" id="save-button">保存</button>

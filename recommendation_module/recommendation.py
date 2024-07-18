@@ -83,8 +83,9 @@ def score_spots(spots, user_profile):
     return sorted(spots, key=lambda x: x['score'], reverse=True)
 
 def recommend_spots(user_location, user_profile, spots_filename, top_n=10):
-    spots = load_scenic_spots(spots_filename)
-    filtered_spots = filter_by_distance(spots, user_location)
+    #spots = load_scenic_spots(spots_filename)
+    #filtered_spots = filter_by_distance(spots, user_location)
+    filtered_spots = filter_by_distance(spots_filename, user_location)
     adjust_interests_based_on_feedback(user_profile, filtered_spots)
     scored_spots = score_spots(filtered_spots, user_profile)
     return scored_spots[:top_n]
