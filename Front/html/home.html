@@ -187,7 +187,7 @@
       <div class="swipe-hint swipe-right">prefer→</div>
       <div class="swipe-hint swipe-left">←created guide</div>
       <div class="register-link">
-        <a href="{{ url_for('map', user_id=user.id) }}" style="font-size: 14px; margin-top: 10px;">マップに戻る</a>
+        <a href="{{ url_for('map_ver2', user_id=user.id) }}" style="font-size: 14px; margin-top: 10px;">マップに戻る</a>
       </div>
     </div>
     <div class="page" id="prefer">
@@ -195,9 +195,9 @@
       <p>評価したガイドを表示します。</p>
       <div class="reviewed-guide-list">
         <ul>
-          {% for guide in reviewed_guides %}
+          {% for guide in liked_guides %}
             <li>
-              {{ guide.title }} - {{ guide.description }}
+              {{ guide.title }} - {{ guide.content }}
             </li>
           {% endfor %}
         </ul>

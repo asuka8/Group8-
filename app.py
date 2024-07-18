@@ -28,6 +28,13 @@ class User(db.Model):
     userprofile = relationship('UserProfile', backref='user', uselist=False, cascade = "delete")
     like_dislike = relationship('Like_Dislike', backref='user', cascade = "delete")
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'password': self.password
+        }
+
     def __repr__(self):
         return f'<User {self.username}>'
     
@@ -50,6 +57,16 @@ class Guide(db.Model):
     updated_at = db.Column(db.Date, default=date.today, onupdate=date.today)
     like_dislike = relationship('Like_Dislike', backref='guide', cascade = "delete")
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
+            'title': self.title,
+            'content': self.content
+        }
+
     def __repr__(self):
         return f"<Guide('{self.user_id}', '{self.content}')>"
    
@@ -59,24 +76,22 @@ class Like_Dislike(db.Model):
     guide_id = db.Column(db.Integer, db.ForeignKey('guide.id'), nullable=False)
     status = db.Column(db.Integer, nullable=False, default = 0)
     __table_args__ = (UniqueConstraint('user_id', 'guide_id', name='uix_user_guide'),)
-#見ただけという情報はいらないならば、statusを1, -1でLike, Dislikeとして扱う
+#statusを1, -1, 0でLike, Dislike, どちらでもないとして扱う
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'guide_id': self.guide_id,
+            'status': self.status
+        }
 
     def __repr__(self):
         return f"<LikeDislike('{self.user_id}', '{self.guide_id}', '{self.status}')>"
-
-# Userと同時にUserprofileも作成
-'''@event.listens_for(User, 'after_insert')
-def create_user_profile(mapper, connection, target):
-    try:
-        new_profile = UserProfile(user_id=target.id)
-        connection.execute(UserProfile.__table__.insert(), {'user_id': target.id})
-    except Exception as e:
-        db.session.rollback()
-        raise e'''
     
-@app.route('/')
+    
+'''@app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html')'''
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -97,20 +112,26 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/home')
+'''@app.route('/home')
 def home():
-    return render_template('home.html')
+    return render_template('home.html')'''
 
 @app.route('/user/<int:user_id>')
 def user_page(user_id):
     user = User.query.get(user_id)
     userprofile = UserProfile.query.filter_by(user_id=user_id).first()
-    guides = Guide.query.filter_by(user_id=user_id).all()
+
     if not user:
         return abort(404, description="User not found")
     if not userprofile:
         return abort(404, description="User not found")
-    return render_template('home.html', user=user, userprofile=userprofile, guides=guides)
+    
+    guides = Guide.query.filter_by(user_id=user_id).all()
+    liked_dislikes = Like_Dislike.query.filter_by(user_id=user_id, status=1).all()
+    liked_guide_ids = [ld.guide_id for ld in liked_dislikes]
+    liked_guides = Guide.query.filter(Guide.id.in_(liked_guide_ids)).all()
+
+    return render_template('home.html', user=user, userprofile=userprofile, guides=guides, liked_guides=liked_guides)
 
 @app.route('/user/<int:user_id>/update', methods=['POST'])
 def update_profile(user_id):
@@ -134,9 +155,46 @@ def update_profile(user_id):
 @app.route('/map/<int:user_id>', methods=['GET', 'POST'])
 def map(user_id):
     user = User.query.get(user_id)
+    like_dislike = Like_Dislike.query.filter_by(user_id=user_id).all()
     if not user:
         return abort(404, description="User not found")
-    return render_template('index.html', user=user)
+    like_dislike_dict = [ld.to_dict() for ld in like_dislike]  # Convert objects to dicts
+    return render_template('index.html', user=user, like_dislike=like_dislike_dict)
+
+@app.route('/map_ver2/<int:user_id>', methods=['GET', 'POST'])
+def map_ver2(user_id):
+    user = User.query.get(user_id)
+    guides = Guide.query.all()
+    like_dislike = Like_Dislike.query.filter_by(user_id=user_id).all()
+    if not user:
+        return abort(404, description="User not found")
+    user_dict = user.to_dict()  # Convert object to dict
+    guides_dict = [guide.to_dict() for guide in guides]  # Convert objects to dicts
+    like_dislike_dict = [ld.to_dict() for ld in like_dislike]  # Convert objects to dicts
+    return render_template('index_ver3.html', user=user, user_json=user_dict, guides=guides_dict, like_dislike=like_dislike_dict)
+
+@app.route('/get_all_data', methods=['GET'])
+def get_all_data():
+    guides = Guide.query.all()
+    like_dislikes = Like_Dislike.query.all()
+    guides_dict = [guide.to_dict() for guide in guides]  # Convert objects to dicts
+    like_dislike_dict = [ld.to_dict() for ld in like_dislikes]  # Convert objects to dicts
+    return jsonify({'guides': guides_dict, 'like_dislikes': like_dislike_dict})
+
+@app.route('/delete_null_coordinates_guides', methods=['DELETE'])
+def delete_null_coordinates_guides():
+    guides_to_delete = Guide.query.filter((Guide.latitude == None) | (Guide.longitude == None)).all()
+    
+    if not guides_to_delete:
+        return jsonify({"message": "No guides with null coordinates found"}), 404
+
+    for guide in guides_to_delete:
+        db.session.delete(guide)
+    
+    db.session.commit()
+
+    return jsonify({"message": f"{len(guides_to_delete)} guides deleted successfully"}), 200
+
 
 @app.route('/load_attractions', methods=['GET'])
 def load_attractions():
@@ -173,16 +231,16 @@ def add_marker(user_id):
     location_name = data.get('location_name')
     description = data.get('description', '')
 
-    if description:
+    '''if description:
         from junk_classify_module import classification
         if classification.classify_message(description) == 1:
-            return abort(400, description="Junk content")
+            return abort(400, description="Junk content")'''
     
     if lat is not None and lng is not None and location_name and user:
-        marker = {'lat': lat, 'lng': lng, 'location_name': location_name, 'description': description, 'likes': 0, 'dislikes': 0}
-        user_markers = load_markers()
-        user_markers.append(marker)
-        save_markers(user_markers)
+        #marker = {'lat': lat, 'lng': lng, 'location_name': location_name, 'description': description, 'likes': 0, 'dislikes': 0}
+        #user_markers = load_markers()
+        #user_markers.append(marker)
+        #save_markers(user_markers)
         new_guide = Guide(user_id=user_id, latitude=lat, longitude=lng, title=location_name, content=description)
         try:
             db.session.add(new_guide)
@@ -194,7 +252,7 @@ def add_marker(user_id):
     else:
         return jsonify({'error': 'Invalid data'}), 400
 
-@app.route('/update_marker/<int:user_id>', methods=['POST'])
+@app.route('/update_marker/<int:user_id>', methods=['POST'])   #使っていない
 def update_marker(user_id):
     user = User.query.get(user_id)
     data = request.get_json()
@@ -259,28 +317,69 @@ def update_marker(user_id):
 
     return jsonify({'error': 'Marker not found'}), 404
 
+@app.route('/update_marker_ver2/<int:user_id>', methods=['POST'])
+def update_marker_ver2(user_id):
+    app.logger.debug('Received request for user_id: %s', user_id)
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    data = request.get_json()
+    app.logger.debug('Received data: %s', data)
+    if not data:
+        return jsonify({'error': 'No input data provided'}), 400
+
+    lat = data.get('lat')
+    lng = data.get('lng')
+    action = data.get('action')
+    description = data.get('description', '')  # Unused, can be removed if not needed
+
+    # Validate required fields
+    if lat is None or lng is None or action is None:
+        app.logger.debug('Missing data fields: lat=%s, lng=%s, action=%s', lat, lng, action)
+        return jsonify({'error': 'Missing data fields'}), 400
+
+    # Optional: Junk content classification
+    '''if description:
+        from junk_classify_module import classification
+        if classification.classify_message(description) == 1:
+            return abort(400, description="Junk content")'''
+
+    guide = Guide.query.filter_by(latitude=lat, longitude=lng).first()
+    if not guide:
+        return jsonify({'error': 'Guide not found'}), 404
+
+    existing_like_dislike = Like_Dislike.query.filter_by(user_id=user_id, guide_id=guide.id).first()
+    if action == 'like':
+        status_value = 1
+    elif action == 'dislike':
+        status_value = -1
+    else:
+        app.logger.debug('Invalid action: %s', action)
+        return jsonify({'error': 'Invalid action'}), 400
+
+    if existing_like_dislike:
+        existing_like_dislike.status = status_value
+    else:
+        new_like_dislike = Like_Dislike(user_id=user_id, guide_id=guide.id, status=status_value)
+        db.session.add(new_like_dislike)
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error('Database commit error: %s', str(e))
+        return jsonify({'error': str(e)}), 500
+
+    app.logger.debug('Marker updated successfully')
+    return jsonify({'message': 'Marker updated successfully!'}), 200
+
+
 @app.route('/tables')
 def tables():
     inspector = inspect(db.engine)
     tables = inspector.get_table_names()
     return jsonify(tables)
-
-'''@app.route('/add_user', methods=['POST'])
-def add_user():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-
-    if username is None or password is None:
-        return jsonify({'error': 'Invalid data'}), 400
-
-    if User.query.filter_by(username=username).first() is not None:
-        return jsonify({'error': 'User already exists'}), 400
-
-    new_user = User(username=username, password=password)
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({'message': 'User added successfully!'}), 201'''
 
 @app.route('/add_user_page')
 def add_user_page():
@@ -331,35 +430,9 @@ def get_user(id):
         return jsonify({'error': 'User not found'}), 404
     return jsonify({'id': user.id, 'username': user.username}), 200
 
-"""@app.route('/add_guide/<int:user_id>', methods=['GET', 'POST'])
-def add_guide(user_id):
-    from junk_classify_module import classification
-    user = User.query.get(user_id)
-    if not user:
-        return abort(404, description="User not found")
-    if request.method == 'POST':
-        content = request.form.get('content')
-        if content is None:
-            return abort(400, description="content is required")
-        
-        if classification.classify_message(content) == 1:
-            return jsonify({'error': "Junk Input"}), 500
-
-        else:
-            new_guide = Guide(user_id=user_id, content=content)
-            try:
-                db.session.add(new_guide)
-                db.session.commit()
-            except Exception as e:
-                db.session.rollback()
-                return jsonify({'error': str(e)}), 500
-            return redirect(url_for('get_guide', user_id=new_guide.id))
-    
-    return render_template('add_guide.html', user_id=user_id)    """
-
 @app.route('/add_guide/<int:user_id>', methods=['GET', 'POST'])
 def add_guide(user_id):
-    from junk_classify_module import classification
+    #from junk_classify_module import classification
     user = User.query.get(user_id)
 
     if not user:
@@ -372,8 +445,8 @@ def add_guide(user_id):
         if content is None:
             return abort(400, description="content is required")
 
-        if classification.classify_message(content) == 1:
-            return abort(400, description="Junk content")
+        #if classification.classify_message(content) == 1:
+            #return abort(400, description="Junk content")
 
         else:
             new_guide = Guide(user_id=user_id, title=title, content=content)
@@ -393,7 +466,7 @@ def get_guide(user_id):
     guides = Guide.query.filter_by(user_id=user_id).all()
     if guides is None:
         return jsonify({'error': 'No guides found for this user'}), 404
-    return jsonify([{'id': guide.id, 'user_id': guide.user_id, 'title': guide.title, 'content': guide.content, 'latitude': guide.latitude, 'longitude': guide.longitude} for guide in guides]), 200
+    return jsonify([{'id': guide.id, 'user_id': guide.user_id, 'title': guide.title, 'content': guide.content, 'latitude': guide.latitude, 'longitude': guide.longitude, 'created_at': guide.created_at, 'updated_at': guide.updated_at} for guide in guides]), 200
 
 @app.route('/get_guides', methods=['GET'])
 def get_guides():

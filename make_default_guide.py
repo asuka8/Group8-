@@ -17,7 +17,7 @@ with open(json_file_path, 'r', encoding='utf-8') as f:
 with app.app_context():
     for attraction in attractions:
         guide = Guide(
-            user_id=None,
+            user_id=1,
             latitude=attraction['lat'],
             longitude=attraction['lng'],
             title=attraction['name'],

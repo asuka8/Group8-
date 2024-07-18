@@ -1,0 +1,23 @@
+<!DOCTYPE html>  <!-- チェック用 -->
+<html>
+<head>
+    <title>Map Application</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <!-- Jinja2の変数をデータ属性として埋め込む -->
+    <div id="data" data-like-dislike='{{ like_dislike|tojson|safe }}'></div>
+
+    <script>
+        // HTML要素のデータ属性からPythonの変数をJavaScriptに渡す
+        var likeDislike = JSON.parse(document.getElementById('data').getAttribute('data-like-dislike'));
+
+        // データをコンソールに出力して確認
+        console.log(likeDislike);
+        likeDislike.forEach(function(ld) {
+            document.body.innerHTML += `<p>User ID: ${ld.user_id}, Guide ID: ${ld.guide_id}, Status: ${ld.status}</p>`;
+        });
+    </script>
+</body>
+</html>

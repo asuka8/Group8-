@@ -36,7 +36,7 @@
         "lng": 135.78736782073977,
         "location_name": "1000",
         "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
-        "likes": 0,
+        "likes": 1,
         "dislikes": 0
     },
     {
@@ -44,7 +44,7 @@
         "lng": 135.78764677047732,
         "location_name": "20000",
         "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
-        "likes": 0,
+        "likes": 1,
         "dislikes": 0
     },
     {
@@ -60,16 +60,16 @@
         "lng": 135.78397750854495,
         "location_name": "1111",
         "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
-        "likes": 0,
-        "dislikes": 1
+        "likes": 1,
+        "dislikes": 0
     },
     {
         "lat": 35.03171146160976,
         "lng": 135.77727579453497,
         "location_name": "友達の家",
         "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
-        "likes": 0,
-        "dislikes": 1
+        "likes": 1,
+        "dislikes": 0
     },
     {
         "lat": 35.023611,
@@ -162,6 +162,70 @@
     {
         "lat": 35.03438891351302,
         "lng": 135.77968597412112,
+        "location_name": "家",
+        "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
+        "likes": 0,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.0307237868422,
+        "lng": 135.7755027181702,
+        "location_name": "2020",
+        "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
+        "likes": 1,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.031981828371734,
+        "lng": 135.77558755874637,
+        "location_name": "家",
+        "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
+        "likes": 0,
+        "dislikes": 1
+    },
+    {
+        "lat": 35.03261435396211,
+        "lng": 135.77661752700809,
+        "location_name": "家2",
+        "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
+        "likes": 1,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.03139078618659,
+        "lng": 135.77662682961093,
+        "location_name": "家",
+        "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
+        "likes": 0,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.030523486829,
+        "lng": 135.7751798629761,
+        "location_name": "家2",
+        "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
+        "likes": 0,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.03052553836931,
+        "lng": 135.77749970005246,
+        "location_name": "家3",
+        "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
+        "likes": 0,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.029978798373676,
+        "lng": 135.77726125717166,
+        "location_name": "家4",
+        "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
+        "likes": 0,
+        "dislikes": 0
+    },
+    {
+        "lat": 35.032175100599275,
+        "lng": 135.77590942382815,
         "location_name": "家",
         "description": "三十三間堂は千手観音像が並ぶ壮観な場所です。",
         "likes": 0,

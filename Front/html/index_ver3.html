@@ -1,4 +1,4 @@
-<!DOCTYPE html> <!-- attractions.jsonとmarker.jsonを利用し、like,dislikeが全ユーザ共通のマップ -->
+<!DOCTYPE html> <!-- GuideテーブルとLike_Dislikeテーブルを利用し、全ガイドが表示され、like,dislikeがユーザ固有のマップ -->
 <html>
 <head>
     <title>Map Application</title>
@@ -101,8 +101,22 @@
         <button id="logout-button">ログアウト</button>
         <button onclick="window.location.href='/user/{{ user.id }}'">ホームへ</button>
     </div>
+
+    <!-- Jinja2の変数をデータ属性として埋め込む -->
+    <div id="user-data" data-user='{{ user_json|tojson|safe }}'></div>
+    <div id="guides-data" data-guides='{{ guides|tojson|safe }}'></div>  <!-- New -->
+    <div id="ld-data" data-like-dislike='{{ like_dislike|tojson|safe }}'></div> <!-- New -->
+
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
+        // HTML要素のデータ属性からPythonの変数をJavaScriptに渡す
+        var userJson = JSON.parse(document.getElementById('user-data').getAttribute('data-user'));
+        var guides = JSON.parse(document.getElementById('guides-data').getAttribute('data-guides')); // New
+        var likeDislikes = JSON.parse(document.getElementById('ld-data').getAttribute('data-like-dislike')); // New
+        var userLikeDislikes = likeDislikes.filter(ld => ld.user_id === userJson.id);
+        var guidesWithStatus = [];
+
+
         document.addEventListener('DOMContentLoaded', function () {
             const logoutButton = document.getElementById('logout-button');
 
@@ -120,18 +134,47 @@
         // 検索バーのイベントリスナーを追加
         document.getElementById('search-input').addEventListener('input', searchAttractions);
 
+        function addStatusToGuides(guides, likeDislikes) {
+            const userLikeDislikes = likeDislikes.filter(ld => ld.user_id === userJson.id);
+            return guides.map(guide => {
+                const userLikeDislike = userLikeDislikes.find(ld => ld.guide_id === guide.id);
+                // guideにstatusプロパティを追加
+                return {
+                    ...guide,
+                    status: userLikeDislike ? userLikeDislike.status : 0
+                };
+            });
+        }
+
+        function fetchAllData() {   //最新のデータをdbからjson形式で取得する(guideとlikedislikeは結合されている)
+            fetch('/get_all_data')
+            .then(response => response.json())
+            .then(data => {
+                guides = data.guides;
+                likeDislikes = data.like_dislikes;
+                console.log('Updated guides:', guides);
+                console.log('Updated likeDislikes:', likeDislikes);
+                guidesWithStatus = addStatusToGuides(guides, likeDislikes);
+                console.log('guideswithstatus:', guidesWithStatus);
+                filterAttractions();
+            })
+            .catch(error => console.error('Error fetching all data:', error));
+        }
+        
+        fetchAllData();  //guidesWithStatusが更新される
+
         // 検索機能の実装
         function searchAttractions() {
             var searchValue = document.getElementById('search-input').value.trim().toLowerCase();
             var resultsContainer = document.getElementById('search-results');
             resultsContainer.innerHTML = '';
 
-            attractions.forEach(attraction => {
-                if (attraction.name.toLowerCase().includes(searchValue)) {
+            guidesWithStatus.forEach(guide => {
+                if (guide.title.toLowerCase().includes(searchValue)) {
                     var li = document.createElement('li');
-                    li.textContent = attraction.name;
+                    li.textContent = guide.title;
                     li.addEventListener('click', function() {
-                        map.setView([attraction.lat, attraction.lng], 15);
+                        map.setView([guide.latitude, guide.longitude], 15);
                     });
                     resultsContainer.appendChild(li);
                 }
@@ -142,7 +185,7 @@
         var userLocation = null;
         var attractions = [];
         var markers = [];
-        var userMarkers = [];
+        console.log('marker = []');
         var currentAction = {};
         var currentDistance = 5000;
 
@@ -150,12 +193,15 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        function createMarker(lat, lng, name, description, likes, dislikes) {
+        function createMarker(lat, lng, title, content, status) {  //markersの作成するだけで配置はしていない
+            console.log('Creating marker for:', { lat, lng, title, content, status });
             var iconUrl = 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png';
-            if (likes > 0) {
+            if (status > 0) {
                 iconUrl = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
-            } else if (dislikes > 0) {
+                console.log('red');
+            } else if (status < 0) {
                 iconUrl = 'http://maps.google.com/mapfiles/ms/icons/ltblue-dot.png';
+                console.log('blue');
             }
 
             var icon = new L.Icon({
@@ -166,19 +212,20 @@
             });
             var marker = L.marker([lat, lng], {icon: icon}).addTo(map);
             marker.bindPopup(`
-                ${name}<br>
-                <button class="btn btn-like ${likes > 0 ? '' : 'btn-inactive'}" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
-                <button class="btn btn-dislike ${dislikes > 0 ? '' : 'btn-inactive'}" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button><br>
-                <div id="desc-${lat}-${lng}" class="desc">${description}</div>
+                ${title}<br>
+                <button class="btn btn-like ${status > 0 ? '' : 'btn-inactive'}" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
+                <button class="btn btn-dislike ${status < 0 ? '' : 'btn-inactive'}" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button><br>
+                <div id="desc-${lat}-${lng}" class="desc">${content}</div>
             `);
             markers.push(marker);
+            console.log('markers:', marker.getLatLng().lat, marker.options.icon.options.iconUrl);
         }
 
-        function updateMarkerColor(lat, lng, likes, dislikes) {
+        function updateMarkerColor(lat, lng, status) {
             var iconUrl = 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png';
-            if (likes > 0) {
+            if (status > 0) {
                 iconUrl = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
-            } else if (dislikes > 0) {
+            } else if (status < 0) {
                 iconUrl = 'http://maps.google.com/mapfiles/ms/icons/ltblue-dot.png';
             }
 
@@ -195,13 +242,8 @@
         }
 
         function showAllAttractions() {
-            attractions.forEach(attraction => {
-                const userMarker = userMarkers.find(marker => marker.lat === attraction.lat && marker.lng === attraction.lng);
-                if (userMarker) {
-                    createMarker(attraction.lat, attraction.lng, attraction.name, userMarker.description, userMarker.likes, userMarker.dislikes);
-                } else {
-                    createMarker(attraction.lat, attraction.lng, attraction.name, "", 0, 0);
-                }
+            guidesWithStatus.forEach(guide => {
+                    createMarker(guide.latitude, guide.longitude, guide.title, guide.content, guide.status);
             });
         }
 
@@ -212,24 +254,13 @@
                 map.removeLayer(marker);
             });
             markers = [];
-
+            console.log('filterAttractions');
             if (userLocation) {
-                attractions.forEach(attraction => {
-                    var d = map.distance(userLocation, [attraction.lat, attraction.lng]);
-                    if (d <= distance) {
-                        const userMarker = userMarkers.find(marker => marker.lat === attraction.lat && marker.lng === attraction.lng);
-                        if (userMarker) {
-                            createMarker(attraction.lat, attraction.lng, attraction.name, userMarker.description, userMarker.likes, userMarker.dislikes);
-                        } else {
-                            createMarker(attraction.lat, attraction.lng, attraction.name, "", 0, 0);
-                        }
-                    }
-                });
-
-                userMarkers.forEach(markerData => {
-                    var d = map.distance(userLocation, [markerData.lat, markerData.lng]);
-                    if (d <= distance) {
-                        createMarker(markerData.lat, markerData.lng, markerData.location_name, markerData.description, markerData.likes, markerData.dislikes);
+                guidesWithStatus.forEach(guide => {
+                    var d = map.distance(userLocation, [guide.latitude, guide.longitude]);
+                    if (d <= distance) { 
+                            createMarker(guide.latitude, guide.longitude, guide.title, guide.content, guide.status);
+                            console.log('status:', guide.status);
                     }
                 });
             }
@@ -257,7 +288,13 @@
         }
 
         function updateMarker(lat, lng, action, description) {
-            fetch('/update_marker/{{ user.id }}', {
+            console.log('Sending data:', {
+                lat: lat,
+                lng: lng,
+                action: action,
+                description: description
+            });
+            fetch(`/update_marker_ver2/${userJson.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -269,13 +306,21 @@
                     description: description
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                if (data.likes !== undefined && data.dislikes !== undefined) {
-                    updateMarkerColor(lat, lng, data.likes, data.dislikes);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
-                fetchMarkers();
+                return response.json();
+            })
+            .then(data => {
+                console.log('fuckinnnnnnnn!!');
+                fetchAllData();
+                if (action === 'like') {
+                    updateMarkerColor(lat, lng, 1);
+                } else if (action === 'dislike') {
+                    updateMarkerColor(lat, lng, -1);
+                }
+                //fetchAllData();
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -290,7 +335,7 @@
                 .bindPopup("You are within " + radius + " meters from this point").openPopup();
 
             L.circle(e.latlng, radius).addTo(map);
-
+            console.log('onLocationFound');
             filterAttractions();
         }
 
@@ -303,39 +348,6 @@
 
         map.locate({setView: true, maxZoom: 16});
 
-        function fetchMarkers() {
-            markers.forEach(marker => {
-                map.removeLayer(marker);
-            });
-            markers = [];
-
-            fetch('/get_attractions')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    attractions = data;
-                    return fetch('/get_markers');
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    userMarkers = data;
-                    filterAttractions();
-                })
-                .catch(error => {
-                    console.error('Error fetching markers or attractions:', error);
-                });
-        }
-
-        fetchMarkers();
 
         map.on('click', function(e) {
             var lat = e.latlng.lat;
@@ -359,7 +371,7 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
-                    fetchMarkers();
+                    fetchAllData();
                 })
                 .catch(error => {
                     console.error('Error:', error);
