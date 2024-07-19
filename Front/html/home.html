@@ -232,15 +232,7 @@
       <div class="page-content" id="profile-display">
         <h1>Profile Page</h1>
         <p id="display-id">ID: {{ user.username }}</p>
-        <p id="display-language">言語: 
-          {% if userprofile.language == 'jp' %}
-              日本語
-          {% elif userprofile.language == 'en' %}
-              English
-          {% elif userprofile.language == 'zh' %}
-              中文
-          {% endif %}
-        </p>
+        <p id="display-language">言語:{% if userprofile.language == 'jp' %}日本語{% elif userprofile.language == 'en' %}English{% elif userprofile.language == 'zh' %}中文{% endif %}</p>
         <p id="display-likes">{{ userprofile.bio }}</p>
         <button id="edit-button">編集</button>
       </div>
