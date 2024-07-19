@@ -66,215 +66,233 @@
       });
     });
   </script>
-    <style>
-      /* ルート要素に基本のフォントサイズを設定 */
-      html {
-        font-size: 16px;
-      }
-  
-      body, html {
-        height: 100%;
-        margin: 0;
-        overflow: hidden;
-      }
-  
-      .container {
-        display: flex;
-        width: 300%;
-        height: 100%;
-        transition: transform 0.5s ease;
-        transform: translateX(-33.3333%);
-      }
-  
-      .page {
-        min-width: 33.3333%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 1.5rem;  /* 24px = 16px * 1.5 */
-        position: relative;
-      }
-  
-      #profile {
-        background-color: lightblue;
-        flex-direction: column;
-        align-items: center;
-      }
-  
-      #createguide {
-        background-color: lightgreen;
-      }
-  
-      #prefer {
-        background-color: lightcoral;
-      }
-  
-      .hidden {
-        display: none;
-      }
-  
-      .page-content {
-        text-align: center;
-      }
-  
-      .edit-form {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-      }
-  
-      .edit-form input, .edit-form textarea {
-        display: block;
-        margin: 10px 0;
-        width: 80%;
-        font-size: 1rem;  /* 16px = 16px * 1 */
-      }
-  
-      .edit-form textarea {
-        height: 150px;
-        white-space: pre-wrap;
-      }
-  
-      .edit-form label {
-        margin-bottom: 5px;
-        font-size: 1rem;  /* 16px = 16px * 1 */
-      }
-  
-      button {
-        margin-top: 20px;
-        font-size: 1rem;  /* 16px = 16px * 1 */
-      }
-  
-      .page-content p {
-        word-break: break-all;  /* 単語の長さが幅を超える場合に自動で改行する */
-        white-space: pre-wrap;  /* 改行を保持しつつ適切に改行する */
-        font-size: 1rem;  /* 16px = 16px * 1 */
-      }
-  
-      .great {
-        position: absolute;
-        left: 10px;
-        bottom: 10px;
-        font-size: 1rem;  /* 16px = 16px * 1 */
-        color: darkblue;
-      }
-  
-      .swipe-hint {
-        position: absolute;
-        bottom: 10px;
-        font-size: 1rem;  /* 16px = 16px * 1 */
-      }
-  
-      .swipe-left {
-        left: 10px;
-      }
-  
-      .swipe-right {
-        right: 10px;
-      }
-  
-      .select-container {
-        width: 80%;
-      }
-  
-      .select-container select {
-        width: 100%;
-        position: relative;
-        z-index: 1;
-        margin: 10px 0;
-        font-size: 1rem;  /* 16px = 16px * 1 */
-      }
-  
-      .guide-list ul, .reviewed-guide-list ul {
-        list-style-type: none;
-        padding: 0;
-      }
-  
-      .guide-list li, .reviewed-guide-list li {
-        margin-bottom: 10px;
-        padding: 10px;
-        font-size: 1rem;  /* 16px = 16px * 1 */
-      }
-  
-      .reviewed-guide-list, .guide-list {
-        max-height: 300px;  /* 必要に応じて適宜変更 */
-        overflow-y: auto;
-      }
-  
-      /* Mobile対応スタイル */
-      @media only screen and (max-width: 600px) {
-        .reviewed-guide-list li {
-          font-size: 0.875rem;  /* 14px = 16px * 0.875 */
-          padding: 15px;
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        /* ルート要素に基本のフォントサイズを設定 */
+        html {
+          font-size: 16px;
         }
-      }
-  
-    </style>
-</head>
-<body>
-  <div class="container">
-    <div class="page" id="createguide">
-      <div class="guide-list">
-        <h1>Created Guide</h1>
-        <ul>
-          {% for guide in guides %}
-            <li>{{ guide.title }} - {{ guide.content }}
-            </li>
-          {% endfor %}
-        </ul>
+    
+        body, html {
+          height: 100%;
+          margin: 0;
+          overflow: hidden;
+        }
+    
+        .container {
+          display: flex;
+          width: 300%;
+          height: 100%;
+          transition: transform 0.5s ease;
+          transform: translateX(-33.3333%);
+        }
+    
+        .page {
+          min-width: 33.3333%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 1.5rem;  /* 24px = 16px * 1.5 */
+          position: relative;
+        }
+    
+        #profile {
+          background-color: lightblue;
+          flex-direction: column;
+          align-items: center;
+        }
+    
+        #createguide {
+          background-color: lightgreen;
+        }
+    
+        #prefer {
+          background-color: lightcoral;
+        }
+    
+        .hidden {
+          display: none;
+        }
+    
+        .page-content {
+          text-align: center;
+          width: 100%;
+        }
+    
+        .edit-form {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+        }
+    
+        .edit-form input, .edit-form textarea {
+          display: block;
+          margin: 10px 0;
+          width: 80%;
+          font-size: 1rem;  /* 16px = 16px * 1 */
+        }
+    
+        .edit-form textarea {
+          height: 150px;
+          white-space: pre-wrap;
+        }
+    
+        .edit-form label {
+          margin-bottom: 5px;
+          font-size: 1rem;  /* 16px = 16px * 1 */
+        }
+    
+        button {
+          margin-top: 20px;
+          font-size: 1rem;  /* 16px = 16px * 1 */
+        }
+    
+        .page-content p {
+          word-break: break-all;  /* 単語の長さが幅を超える場合に自動で改行する */
+          white-space: pre-wrap;  /* 改行を保持しつつ適切に改行する */
+          font-size: 1rem;  /* 16px = 16px * 1 */
+        }
+    
+        .great {
+          position: absolute;
+          left: 10px;
+          bottom: 10px;
+          font-size: 1rem;  /* 16px = 16px * 1 */
+          color: darkblue;
+        }
+    
+        .swipe-hint {
+          position: absolute;
+          bottom: 10px;
+          font-size: 1rem;  /* 16px = 16px * 1 */
+        }
+    
+        .swipe-left {
+          left: 10px;
+        }
+    
+        .swipe-right {
+          right: 10px;
+        }
+    
+        .select-container {
+          width: 80%;
+        }
+    
+        .select-container select {
+          width: 100%;
+          position: relative;
+          z-index: 1;
+          margin: 10px 0;
+          font-size: 1rem;  /* 16px = 16px * 1 */
+        }
+    
+        .guide-list ul, .reviewed-guide-list ul {
+          list-style-type: none;
+          padding: 0;
+        }
+    
+        .guide-list li, .reviewed-guide-list li {
+          margin-bottom: 10px;
+          padding: 10px;
+          font-size: 1rem;  /* 16px = 16px * 1 */
+        }
+    
+        .reviewed-guide-list, .guide-list {
+          max-height: 300px;  /* 必要に応じて適宜変更 */
+          overflow-y: auto;
+        }
+    
+        /* Mobile対応スタイル */
+        @media only screen and (max-width: 600px) {
+          .reviewed-guide-list li {
+            font-size: 0.875rem;  /* 14px = 16px * 0.875 */
+            padding: 15px;
+          }
+        }
+    
+        /* 中央にタイトルを固定するスタイル */
+        .page h1 {
+          position: absolute;
+          top: 10%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin: 0;
+          font-size: 2rem; /* 20px = 16px * 1.25 */
+          text-align: center;
+          width: 100%;
+          z-index: 2; /* コンテンツと重ならないように */
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="page" id="createguide">
+          <h1>Created Guide</h1>
+          <div class="guide-list">
+            <ul>
+              {% for guide in guides %}
+                <li>{{ guide.title }} - {{ guide.content }}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="swipe-hint swipe-right">profile→</div>
+        </div>
+        <div class="page" id="profile">
+          <h1>Profile Page</h1>
+          <div class="page-content" id="profile-display">
+            <p id="display-id">ID: {{ user.username }}</p>
+            <p id="display-language">言語:{% if userprofile.language == 'jp' %}日本語{% elif userprofile.language == 'en' %}English{% elif userprofile.language == 'zh' %}中文{% endif %}</p>
+            <p id="display-likes">{{ userprofile.bio }}</p>
+            <button id="edit-button">編集</button>
+          </div>
+          <div class="page-content hidden" id="profile-edit-form">
+            <form action="{{ url_for('update_profile', user_id=user.id) }}" method="post">
+                <div class="edit-form">
+                    <label for="profile-id">ID</label>
+                    <input type="text" id="profile-id" name="username" placeholder="ID" value="{{ user.username }}">
+                    <div class="select-container">
+                      <label for="profile-language">言語</label>
+                      <select id="profile-language" name="language">
+                          <option value="jp" {% if userprofile.language == 'jp' %}selected{% endif %}>日本語</option>
+                          <option value="en" {% if userprofile.language == 'en' %}selected{% endif %}>English</option>
+                          <option value="zh" {% if userprofile.language == 'zh' %}selected{% endif %}>中文</option>
+                      </select>
+                    </div>
+                    <label for="profile-likes">好きなもの</label>
+                    <textarea id="profile-likes" name="bio" placeholder="好きなもの">{{ userprofile.bio }}</textarea>
+                    <button type="submit" id="save-button">保存</button>
+                </div>
+            </form>
+          </div>
+          <div class="swipe-hint swipe-right">prefer→</div>
+          <div class="swipe-hint swipe-left">←created guide</div>
+          <div class="register-link">
+            <a href="{{ url_for('map_ver2', user_id=user.id) }}" style="font-size: 14px; margin-top: 10px;">マップに戻る</a>
+          </div>
+        </div>
+        <div class="page" id="prefer">
+          <h1>Prefer Page</h1>
+          <div class="reviewed-guide-list">
+            <ul>
+              {% for guide in liked_guides %}
+                <li>
+                  {{ guide.title }} - {{ guide.content }}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="swipe-hint swipe-left">←profile</div>
+        </div>
       </div>
-      <div class="swipe-hint swipe-right">profile→</div>
-    </div>
-    <div class="page" id="profile">
-      <div class="page-content" id="profile-display">
-        <h1>Profile Page</h1>
-        <p id="display-id">ID: {{ user.username }}</p>
-        <p id="display-language">言語:{% if userprofile.language == 'jp' %}日本語{% elif userprofile.language == 'en' %}English{% elif userprofile.language == 'zh' %}中文{% endif %}</p>
-        <p id="display-likes">{{ userprofile.bio }}</p>
-        <button id="edit-button">編集</button>
-      </div>
-      <div class="page-content hidden" id="profile-edit-form">
-        <h1>Profile Page</h1>
-          <form action="{{ url_for('update_profile', user_id=user.id) }}" method="post">
-              <div class="edit-form">
-                  <label for="profile-id">ID</label>
-                  <input type="text" id="profile-id" name="username" placeholder="ID" value="{{ user.username }}">
-                  <div class="select-container">
-                    <label for="profile-language">言語</label>
-                    <select id="profile-language" name="language">
-                        <option value="jp" {% if userprofile.language == 'jp' %}selected{% endif %}>日本語</option>
-                        <option value="en" {% if userprofile.language == 'en' %}selected{% endif %}>English</option>
-                        <option value="zh" {% if userprofile.language == 'zh' %}selected{% endif %}>中文</option>
-                    </select>
-                  </div>
-                  <label for="profile-likes">好きなもの</label>
-                  <textarea id="profile-likes" name="bio" placeholder="好きなもの">{{ userprofile.bio }}</textarea>
-                  <button type="submit" id="save-button">保存</button>
-              </div>
-          </form>
-      </div>
-      <div class="swipe-hint swipe-right">prefer→</div>
-      <div class="swipe-hint swipe-left">←created guide</div>
-      <div class="register-link">
-        <a href="{{ url_for('map_ver2', user_id=user.id) }}" style="font-size: 14px; margin-top: 10px;">マップに戻る</a>
-      </div>
-    </div>
-    <div class="page" id="prefer">
-      <div class="reviewed-guide-list">
-        <h1>Prefer Page</h1>
-        <ul>
-          {% for guide in liked_guides %}
-            <li>
-              {{ guide.title }} - {{ guide.content }}
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="swipe-hint swipe-left">←profile</div>
-    </div>
-  </div>
-</body>
+    </body>
+    </html>
 </html>
