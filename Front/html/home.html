@@ -4,100 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>スワイプで画面遷移</title>
-  <style>
-    body, html {
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-    }
-    .container {
-      display: flex;
-      width: 300%;
-      height: 100%;
-      transition: transform 0.5s ease;
-      transform: translateX(-33.3333%);
-    }
-    .page {
-      min-width: 33.3333%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 24px;
-      position: relative;
-    }
-    #profile {
-      background-color: lightblue;
-      flex-direction: column;
-      align-items: center;
-    }
-    #createguide {
-      background-color: lightgreen;
-    }
-    #prefer {
-      background-color: lightcoral;
-    }
-    .hidden {
-      display: none;
-    }
-    .page-content {
-      text-align: center;
-    }
-    .edit-form {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-    }
-    .edit-form input, .edit-form textarea {
-      display: block;
-      margin: 10px 0;
-      width: 80%;
-    }
-    .edit-form textarea {
-      height: 150px;
-      white-space: pre-wrap;
-    }
-    .edit-form label {
-      margin-bottom: 5px;
-    }
-    button {
-      margin-top: 20px;
-    }
-    .page-content p {
-      word-break: break-all; /* 単語の長さが幅を超える場合に自動で改行する */
-      white-space: pre-wrap; /* 改行を保持しつつ適切に改行する */
-    }
-    .great {
-    position: absolute;
-    left: 10px;
-    bottom: 10px;
-    font-size: 16px;
-    color: darkblue;
-    }
-    .swipe-hint {
-      position: absolute;
-      bottom: 10px;
-      font-size: 16px;
-    }
-    .swipe-left {
-      left: 10px;
-    }
-    .swipe-right {
-      right: 10px;
-    }
-    .select-container {
-      width: 80%;
-    }
-
-    .select-container select {
-      width: 100%;
-      position: relative;
-      z-index: 1;
-      margin: 10px 0;
-    }
-  </style>
   <script>
     const swipeThreshold = 60;
     let startX = 0;
@@ -160,12 +66,159 @@
       });
     });
   </script>
+    <style>
+      /* ルート要素に基本のフォントサイズを設定 */
+      html {
+        font-size: 16px;
+      }
+  
+      body, html {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+  
+      .container {
+        display: flex;
+        width: 300%;
+        height: 100%;
+        transition: transform 0.5s ease;
+        transform: translateX(-33.3333%);
+      }
+  
+      .page {
+        min-width: 33.3333%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;  /* 24px = 16px * 1.5 */
+        position: relative;
+      }
+  
+      #profile {
+        background-color: lightblue;
+        flex-direction: column;
+        align-items: center;
+      }
+  
+      #createguide {
+        background-color: lightgreen;
+      }
+  
+      #prefer {
+        background-color: lightcoral;
+      }
+  
+      .hidden {
+        display: none;
+      }
+  
+      .page-content {
+        text-align: center;
+      }
+  
+      .edit-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+      }
+  
+      .edit-form input, .edit-form textarea {
+        display: block;
+        margin: 10px 0;
+        width: 80%;
+        font-size: 1rem;  /* 16px = 16px * 1 */
+      }
+  
+      .edit-form textarea {
+        height: 150px;
+        white-space: pre-wrap;
+      }
+  
+      .edit-form label {
+        margin-bottom: 5px;
+        font-size: 1rem;  /* 16px = 16px * 1 */
+      }
+  
+      button {
+        margin-top: 20px;
+        font-size: 1rem;  /* 16px = 16px * 1 */
+      }
+  
+      .page-content p {
+        word-break: break-all;  /* 単語の長さが幅を超える場合に自動で改行する */
+        white-space: pre-wrap;  /* 改行を保持しつつ適切に改行する */
+        font-size: 1rem;  /* 16px = 16px * 1 */
+      }
+  
+      .great {
+        position: absolute;
+        left: 10px;
+        bottom: 10px;
+        font-size: 1rem;  /* 16px = 16px * 1 */
+        color: darkblue;
+      }
+  
+      .swipe-hint {
+        position: absolute;
+        bottom: 10px;
+        font-size: 1rem;  /* 16px = 16px * 1 */
+      }
+  
+      .swipe-left {
+        left: 10px;
+      }
+  
+      .swipe-right {
+        right: 10px;
+      }
+  
+      .select-container {
+        width: 80%;
+      }
+  
+      .select-container select {
+        width: 100%;
+        position: relative;
+        z-index: 1;
+        margin: 10px 0;
+        font-size: 1rem;  /* 16px = 16px * 1 */
+      }
+  
+      .guide-list ul, .reviewed-guide-list ul {
+        list-style-type: none;
+        padding: 0;
+      }
+  
+      .guide-list li, .reviewed-guide-list li {
+        margin-bottom: 10px;
+        padding: 10px;
+        font-size: 1rem;  /* 16px = 16px * 1 */
+      }
+  
+      .reviewed-guide-list, .guide-list {
+        max-height: 300px;  /* 必要に応じて適宜変更 */
+        overflow-y: auto;
+      }
+  
+      /* Mobile対応スタイル */
+      @media only screen and (max-width: 600px) {
+        .reviewed-guide-list li {
+          font-size: 0.875rem;  /* 14px = 16px * 0.875 */
+          padding: 15px;
+        }
+      }
+  
+    </style>
 </head>
 <body>
   <div class="container">
     <div class="page" id="createguide">
       <div class="guide-list">
-        <h2>Created Guide</h2>
+        <h1>Created Guide</h1>
         <ul>
           {% for guide in guides %}
             <li>{{ guide.title }} - {{ guide.content }}
@@ -218,9 +271,8 @@
       </div>
     </div>
     <div class="page" id="prefer">
-      <h1>Prefer Page</h1>
-      <p>評価したガイドを表示します。</p>
       <div class="reviewed-guide-list">
+        <h1>Prefer Page</h1>
         <ul>
           {% for guide in liked_guides %}
             <li>
