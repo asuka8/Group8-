@@ -272,6 +272,7 @@
   <div class="container">
     <div class="page" id="createguide">
         <h1>Created Guide</h1>
+      {% if guides %}
       <div class="scroll-container">
         <div class="guide-list">
           <ul>
@@ -284,6 +285,9 @@
           </ul>
         </div>
       </div>
+      {% else %}
+      <p>No guides available.</p>
+      {% endif %}
       <div class="swipe-hint swipe-right">profile→</div>
     </div>
     <div class="page" id="profile">
@@ -330,6 +334,7 @@
     </div>
     <div class="page" id="prefer">
       <h1>Prefer Page</h1>
+      {% if guides %}
       <div class="scroll-container">
         <div class="reviewed-guide-list">
           <ul>
@@ -342,6 +347,9 @@
           </ul>
         </div>
       </div>
+      {% else %}
+      <p>No preferred guides available.</p>
+      {% endif %}
       <div class="swipe-hint swipe-left">←profile</div>
     </div>
   </div>
