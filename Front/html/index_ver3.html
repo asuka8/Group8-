@@ -12,24 +12,42 @@
         }
         #search-bar {
             position: fixed;
-            bottom: 10px;
-            left: 50%;
+            bottom: 20px;
+            left: 75%;
             transform: translateX(-50%);
             background: white;
-            padding: 10px;
+            padding: 7px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             z-index: 1000;
         }
+        #search-input {
+            margin-right: 0px; /* inputとbuttonの間の間隔を狭くする */
+        }
+        #search-results {
+            max-height: 80px; /* 縦幅を狭くする */
+            overflow-y: auto; /* 縦方向のスクロールを有効にする */
+        }
         #filter {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 19px;
+            left: 70px;
             z-index: 1000;
             background: white;
             padding: 10px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            font-size: 12px;
+        }
+        #filter label,
+        #filter select,
+        #filter button {
+            margin: 2px 0; /* 縦のマージンを狭くする */
+            padding: 0px;  /* 必要に応じてパディングも調整 */
+        }
+        #filter button {
+            height: 23px;
+            width: 75px;
         }
         .btn {
             display: inline-block;
@@ -61,46 +79,84 @@
         }
         .bottom-left-buttons {
             position: fixed;
-            bottom: 10px;
+            bottom: 18px;
             left: 10px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 0px;
             z-index: 1100;
         }
 
         /* ボタンのスタイル */
         .bottom-left-buttons button {
-            padding: 8px 15px;
+            padding: 0px 5px;
             font-size: 12px;
             cursor: pointer;
+            height: 33px; /* ボタンの高さを統一 */
+            box-sizing: border-box; /* パディングとボーダーを含めた幅と高さを計算 */
+            margin: 0; /* ボタンの外側の余白をゼロに設定 */
+            margin-bottom: 5px; /* ボタン同士の間隔を調整 */
         }
+
+        button {
+            margin-top: 20px;
+            font-size: 11px; 
+            padding: 5px 10px;  /* ボタンの内側余白 */
+            border: none;  /* ボーダーを削除 */
+            border-radius: 10px;  /* 角を丸くする */
+            background: linear-gradient(to right, #525356, #75787b);  /* グラデーション背景 */
+            color: white;  /* 文字色を白にする */
+            cursor: pointer;  /* ポインターを変更 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);  /* ボックスシャドウを追加 */
+            transition: all 0.3s ease;  /* トランジションを追加 */
+        }
+
+        button:hover {
+            background: linear-gradient(to right, #75787b, #525356);  /* ホバー時の背景 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);  /* ホバー時のシャドウ */
+            transform: translateY(-2px);  /* ホバー時の動き */
+        }
+                /* モバイル表示用のスタイル */
+        @media (max-width: 768px) {
+            #search-bar {
+                flex-direction: column; /* 縦並びにする */
+                align-items: flex-start; /* 要素を左揃えにする */
+            }
+            #search-input {
+                margin-bottom: 4px; /* 下マージンを追加して間隔を狭くする */
+            }
+            #search-bar button {
+            margin-top: 0px; /* ボタンの上マージンを削除 */
+
+        }
+        }
+
     </style>
 </head>
 <body>
     <div id="filter">
-        <label for="distance">Filter by distance:</label>
+        <label for="distance"><b>Filter by distance:</b></label>
         <select id="distance">
             <option value="1000">1 km</option>
             <option value="3000">3 km</option>
             <option value="5000" selected>5 km</option>
             <option value="10000">10 km</option>
         </select>
-        <button onclick="filterAttractions()">Apply Filter</button>
+        <button onclick="filterAttractions()"><b>Apply Filter</b></button>
     </div>
 
     <div id="search-bar">
-        <label for="search-input">Search:</label>
+        <label for="search-input"><b>Search:</b></label>
         <input type="text" id="search-input" placeholder="Enter location name">
-        <button onclick="searchAttractions()">Search</button>
+        <button onclick="searchAttractions()"><b>Search</b></button>
         <ul id="search-results"></ul>
     </div>
 
     <div id="map"></div>
     <div class="bottom-left-buttons">
-        <button id="logout-button">ログアウト</button>
-        <button onclick="window.location.href='/user/{{ user.id }}'">ホームへ</button>
-        <button id="toggleButton">Start Voice Guide</button>
+        <button id="logout-button"><b>ログアウト</b></button>
+        <button onclick="window.location.href='/user/{{ user.id }}'"><b>ホームへ</b></button>
+        <button id="toggleButton"><b>Start Voice Guide</b></button>
     </div>
 
     <!-- Jinja2の変数をデータ属性として埋め込む -->
