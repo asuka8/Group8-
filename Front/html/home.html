@@ -97,13 +97,13 @@
       }
   
       #profile {
-        background-color: lightblue;
+        background: linear-gradient(to bottom right, #00c6ff, #0072ff); /* 青のグラデーション */
         flex-direction: column;
         align-items: center;
       }
   
       #createguide {
-        background-color: lightgreen;
+        background: linear-gradient(to bottom right, #a8e063, #56ab2f); /* 緑のグラデーション */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -111,7 +111,7 @@
       }
   
       #prefer {
-        background-color: lightcoral;
+        background: linear-gradient(to bottom right, #ff758c, #ff7eb3); /* ピンクのグラデーション */
       }
   
       .hidden {
@@ -205,6 +205,10 @@
         margin-left: 10px;  /* 左に余白を追加 */
         margin-right: 10px; /* 右に余白を追加 */
 
+      }
+
+      .guide-list li:last-child, .reviewed-guide-list li:last-child {
+        border-bottom: none;  /* 最後の要素の下線を削除 */
       }
 
       .guide-list {
