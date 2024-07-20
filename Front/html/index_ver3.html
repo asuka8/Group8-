@@ -4,6 +4,7 @@
     <title>Map Application</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         #map {
@@ -96,11 +97,14 @@
             box-sizing: border-box; /* パディングとボーダーを含めた幅と高さを計算 */
             margin: 0; /* ボタンの外側の余白をゼロに設定 */
             margin-bottom: 5px; /* ボタン同士の間隔を調整 */
+            display: flex; /* フレックスボックスを使う */
+            align-items: center; /* 垂直方向の中央揃え */
+            justify-content: center; /* 水平方向の中央揃え */
         }
 
-        button {
+        .general-button {
             margin-top: 20px;
-            font-size: 11px; 
+            font-size: 11px;
             padding: 5px 10px;  /* ボタンの内側余白 */
             border: none;  /* ボーダーを削除 */
             border-radius: 10px;  /* 角を丸くする */
@@ -111,11 +115,90 @@
             transition: all 0.3s ease;  /* トランジションを追加 */
         }
 
-        button:hover {
+        .general-button:hover {
             background: linear-gradient(to right, #75787b, #525356);  /* ホバー時の背景 */
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);  /* ホバー時のシャドウ */
             transform: translateY(-2px);  /* ホバー時の動き */
         }
+
+        #search-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 75%;
+            transform: translateX(170%); /* 初期状態で右に隠す */
+            background: white;
+            padding: 7px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+            transition: transform 0.5s ease-in-out; /* アニメーションを設定 */
+        }
+        #search-bar.show {
+            transform: translateX(-50%) translateX(0); /* 表示状態にする */
+        }
+        #search-input {
+            margin-right: 0px; /* inputとbuttonの間の間隔を狭くする */
+        }
+        #search-results {
+            max-height: 80px; /* 縦幅を狭くする */
+            overflow-y: auto; /* 縦方向のスクロールを有効にする */
+        }
+        #search-button {
+            position: fixed;
+            bottom: 20px; /* 位置を右下に調整 */
+            right: 13px; /* 位置を右下に調整 */
+            z-index: 1001;
+            cursor: pointer;
+            background: white;
+            padding: 8px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            border: none;
+            background: linear-gradient(to right, #525356, #75787b);  /* グラデーション背景 */
+            color: white;  /* 文字色を白にする */
+            transition: all 0.3s ease;  /* トランジションを追加 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #search-button:hover {
+            background: linear-gradient(to right, #75787b, #525356);  /* ホバー時の背景 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);  /* ホバー時のシャドウ */
+            transform: translateY(-2px);  /* ホバー時の動き */
+        }
+
+        #search-button.red {
+            background: linear-gradient(to right, #ff0000, #cc0000); /* 赤のグラデーション背景 */
+            height: 30px;
+            width: 30px; /* バツマークに変わるときの幅を調整 */
+            font-size: 15px;
+        }
+
+        .leaflet-popup-content-wrapper {
+            font-size: 11px; /* テキストのサイズを小さくする */
+        }
+
+        .leaflet-popup-content {
+            margin: 4px 6px; /* ポップアップ内の余白を調整 */
+            display: flex; /* フレックスボックスを有効にする */
+            align-items: center; /* 垂直方向に中央揃え */
+            margin-right: 22px; /* 右側に余白を追加して左にずらす */
+
+        }
+
+        .leaflet-popup-tip-container {
+            width: 10px; /* ポップアップの矢印の幅を調整 */
+            height: 10px; /* ポップアップの矢印の高さを調整 */
+        }
+
+        .leaflet-popup-close-button {
+            font-size: 1px; /* 閉じるボタンのサイズを小さくする */
+        }
+
                 /* モバイル表示用のスタイル */
         @media (max-width: 768px) {
             #search-bar {
@@ -142,21 +225,27 @@
             <option value="5000" selected>5 km</option>
             <option value="10000">10 km</option>
         </select>
-        <button onclick="filterAttractions()"><b>Apply Filter</b></button>
+        <button onclick="filterAttractions()" class="general-button"><b>Apply Filter</b></button>
     </div>
-
+    <button id="search-button" onclick="toggleSearchBar()">Search</button>
     <div id="search-bar">
         <label for="search-input"><b>Search:</b></label>
         <input type="text" id="search-input" placeholder="Enter location name">
-        <button onclick="searchAttractions()"><b>Search</b></button>
+        <button onclick="searchAttractions()" class="general-button"><span class="material-icons" style="font-size: 17px;">
+            search
+            </span></button>
         <ul id="search-results"></ul>
     </div>
 
     <div id="map"></div>
     <div class="bottom-left-buttons">
-        <button id="logout-button"><b>ログアウト</b></button>
-        <button onclick="window.location.href='/user/{{ user.id }}'"><b>ホームへ</b></button>
-        <button id="toggleButton"><b>Start Voice Guide</b></button>
+        <button id="logout-button" class="general-button"><b>Logout</b><span class="material-icons" style="margin-left: 8px;">
+            logout
+            </span></button>
+        <button onclick="window.location.href='/user/{{ user.id }}'" class="general-button"><b>Home</b><span class="material-icons" style="margin-left: 8px;">
+            home
+            </span></button>
+        <button id="toggleButton" class="general-button"><b>Start Voice Guide</b></button>
     </div>
 
     <!-- Jinja2の変数をデータ属性として埋め込む -->
@@ -192,6 +281,25 @@
 
         // 検索バーのイベントリスナーを追加
         document.getElementById('search-input').addEventListener('input', searchAttractions);
+
+        function toggleSearchBar() {
+            var searchBar = document.getElementById('search-bar');
+            var searchButton = document.getElementById('search-button');
+
+            if (searchBar.classList.contains('show')) {
+                searchBar.classList.remove('show');
+                setTimeout(() => {
+                    searchButton.innerHTML = '<i class="fas fa-search"></i> Search'; // 元の文字に戻す
+                    searchButton.classList.remove('red');
+                }, 300); // トランジション時間に合わせて遅延
+            } else {
+                searchBar.classList.add('show');
+                setTimeout(() => {
+                    searchButton.innerHTML = '×'; // バツマークに変更
+                    searchButton.classList.add('red');
+                }, 300); // トランジション時間に合わせて遅延
+            }
+        }
 
         function addStatusToGuides(guides, likeDislikes) {
             const userLikeDislikes = likeDislikes.filter(ld => ld.user_id === userJson.id);
@@ -271,7 +379,7 @@
             });
             var marker = L.marker([lat, lng], {icon: icon}).addTo(map);
             marker.bindPopup(`
-                ${title}<br>
+                <b>${title}</b><br>
                 <button class="btn btn-like ${status > 0 ? '' : 'btn-inactive'}" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
                 <button class="btn btn-dislike ${status < 0 ? '' : 'btn-inactive'}" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button><br>
                 <div id="desc-${lat}-${lng}" class="desc">${content}</div>

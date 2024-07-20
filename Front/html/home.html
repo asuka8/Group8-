@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <title>スワイプで画面遷移</title>
   <script>
     const swipeThreshold = 60;
@@ -348,7 +349,7 @@
           {% endif %}
         </b></p>
         <p id="display-likes">{{ userprofile.bio }}</p>
-        <button id="edit-button">編集</button>
+        <button id="edit-button"><b>編集</b></button>
       </div>
       <div class="page-content hidden" id="profile-edit-form">
         <h1>Profile Page</h1>
@@ -373,7 +374,7 @@
       <div class="swipe-hint swipe-right">prefer→</div>
       <div class="swipe-hint swipe-left">←created guide</div>
       <div class="register-link">
-        <a href="{{ url_for('map_ver2', user_id=user.id) }}" style="font-size: 14px; margin-top: 10px;">マップに戻る</a>
+        <a href="{{ url_for('map_ver2', user_id=user.id) }}" style="font-size: 14px; margin-top: 10px;"><b>マップに戻る</b></a>
       </div>
     </div>
     <div class="page" id="prefer">
