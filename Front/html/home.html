@@ -134,11 +134,21 @@
         height: 100%;
       }
   
-      .edit-form input, .edit-form textarea {
+      .edit-form input, .edit-form textarea, .edit-form select{
         display: block;
         margin: 10px 0;
         width: 80%;
         font-size: 1rem;  /* 16px = 16px * 1 */
+        border: 1px solid #ccc;  /* ボーダーの色 */
+        border-radius: 8px;  /* 角を丸くする */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* 影を追加して立体感を出す */
+        outline: none;  /* フォーカス時のデフォルトアウトラインを削除 */
+        transition: all 0.3s ease;  /* トランジションを追加 */
+      }
+
+      .edit-form input:focus, .edit-form textarea:focus, .edit-form select:focus {
+        border-color: #6a11cb;  /* フォーカス時のボーダー色 */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* フォーカス時の影 */
       }
   
       .edit-form textarea {
@@ -327,8 +337,8 @@
     <div class="page" id="profile">
       <div class="page-content" id="profile-display">
         <h1>Profile Page</h1>
-        <p id="display-id">ID: {{ user.username }}</p>
-        <p id="display-language">言語: 
+        <p id="display-id"><b>ID: {{ user.username }}</b></p>
+        <p id="display-language"><b>言語: 
           {% if userprofile.language == 'ja' %}
             <span>日本語</span>
           {% elif userprofile.language == 'en' %}
@@ -336,7 +346,7 @@
           {% elif userprofile.language == 'zh' %}
             <span>中文</span>
           {% endif %}
-        </p>
+        </b></p>
         <p id="display-likes">{{ userprofile.bio }}</p>
         <button id="edit-button">編集</button>
       </div>
