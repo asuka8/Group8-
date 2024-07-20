@@ -42,7 +42,7 @@ class UserProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
     bio = db.Column(db.String(1024), default='')
-    language = db.Column(db.String(2), nullable=False, default='jp')  # 言語情報を追加
+    language = db.Column(db.String(2), nullable=False, default='ja')  # 言語情報を追加
 
     def to_dict(self):
         return {
