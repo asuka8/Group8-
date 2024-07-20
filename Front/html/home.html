@@ -98,6 +98,7 @@
   
       #profile {
         background: linear-gradient(to bottom right, rgba(0, 198, 255, 0.5), rgba(0, 114, 255, 0.5)); /* 青のグラデーション */
+        display: flex;
         flex-direction: column;
         align-items: center;
       }
@@ -112,6 +113,9 @@
   
       #prefer {
         background: linear-gradient(to bottom right, rgba(255, 117, 140, 0.5), rgba(255, 126, 179, 0.5)); /* ピンクのグラデーション */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
   
       .hidden {
@@ -191,6 +195,17 @@
         margin: 10px 0;
         font-size: 1rem;  /* 16px = 16px * 1 */
       }
+
+      .scroll-container {
+        max-height: 320px;  /* スクロール領域の高さを調整 */
+        overflow-y: auto;
+        margin-top: 20px; /* 見出しとの間にマージンを追加 */
+        border: 1px solid rgba(0, 0, 0, 0.2); /* 薄い線を追加 */
+        border-radius: 10px; /* 角を丸くする */
+        padding: 10px; /* 内側に余白を追加 */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 影を追加して立体感を出す */
+      }
+
   
       .guide-list ul, .reviewed-guide-list ul {
         list-style-type: none;
@@ -210,16 +225,11 @@
       .guide-list li:last-child, .reviewed-guide-list li:last-child {
         border-bottom: none;  /* 最後の要素の下線を削除 */
       }
-
-      .guide-list {
-        max-height: 300px;  /* 必要に応じて適宜変更 */
-        overflow-y: auto;
-        margin-top: 20px; /* 見出しとの間にマージンを追加 */
-      }
   
       .reviewed-guide-list, .guide-list {
         max-height: 300px;  /* 必要に応じて適宜変更 */
         overflow-y: auto;
+        margin-top: 20px; /* 見出しとの間にマージンを追加 */
       }
 
       #display-language {
@@ -237,6 +247,11 @@
           font-size: 0.875rem;  /* 14px = 16px * 0.875 */
           padding: 15px;
         }
+
+        .scroll-container {
+          margin-left: 10px;  /* 左に余白を追加 */
+          margin-right: 10px; /* 右に余白を追加 */
+        }
       }
   
     </style>
@@ -245,13 +260,15 @@
   <div class="container">
     <div class="page" id="createguide">
         <h1>Created Guide</h1>
-      <div class="guide-list">
-        <ul>
-          {% for guide in guides %}
-            <li>{{ guide.title }} - {{ guide.content }}
-            </li>
-          {% endfor %}
-        </ul>
+      <div class="scroll-container">
+        <div class="guide-list">
+          <ul>
+            {% for guide in guides %}
+              <li>{{ guide.title }} - {{ guide.content }}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
       </div>
       <div class="swipe-hint swipe-right">profile→</div>
     </div>
@@ -298,15 +315,17 @@
       </div>
     </div>
     <div class="page" id="prefer">
-      <div class="reviewed-guide-list">
-        <h1>Prefer Page</h1>
-        <ul>
-          {% for guide in liked_guides %}
-            <li>
-              {{ guide.title }} - {{ guide.content }}
-            </li>
-          {% endfor %}
-        </ul>
+      <h1>Prefer Page</h1>
+      <div class="scroll-container">
+        <div class="reviewed-guide-list">
+          <ul>
+            {% for guide in liked_guides %}
+              <li>
+                {{ guide.title }} - {{ guide.content }}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
       </div>
       <div class="swipe-hint swipe-left">←profile</div>
     </div>
