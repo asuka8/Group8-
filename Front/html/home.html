@@ -242,6 +242,16 @@
       #display-language span {
         display: inline-block;
       }
+
+      .guide-title {
+        font-size: 1.1rem; /* 文字サイズを調整 */
+        font-weight: bold;
+      }
+
+
+      .guide-content {
+        margin-top: 2px; /* 調整する余白の値 */
+      }
   
       /* Mobile対応スタイル */
       @media only screen and (max-width: 600px) {
@@ -266,7 +276,9 @@
         <div class="guide-list">
           <ul>
             {% for guide in guides %}
-              <li>{{ guide.title }} - {{ guide.content }}
+              <li>
+                <span class="guide-title">{{ guide.title }}</span>
+                <p class="guide-content">{{ guide.content }}</p>
               </li>
             {% endfor %}
           </ul>
@@ -322,9 +334,10 @@
         <div class="reviewed-guide-list">
           <ul>
             {% for guide in liked_guides %}
-              <li>
-                {{ guide.title }} - {{ guide.content }}
-              </li>
+            <li>
+              <span class="guide-title">{{ guide.title }}</span>
+              <p class="guide-content">{{ guide.content }}</p>
+            </li>
             {% endfor %}
           </ul>
         </div>
