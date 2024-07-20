@@ -62,16 +62,41 @@
             border: none;
         }
         .btn-like {
-            background-color: red;
+            background: linear-gradient(to right, #ff0000, #cc0000);
             color: white;
+        }
+        .btn-like:hover {
+            background: linear-gradient(to right, #cc0000, #ff0000);  /* ホバー時の背景 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);  /* ホバー時のシャドウ */
+            transform: translateY(-2px);  /* ホバー時の動き */
+        }
+        .btn-like.btn-inactive:hover {
+            background: linear-gradient(to right, #cc0000, #ff0000);  /* ホバー時の背景 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);  /* ホバー時のシャドウ */
+            transform: translateY(-2px);  /* ホバー時の動き */
         }
         .btn-dislike {
-            background-color: blue;
+            background: linear-gradient(to right, #0000ff, #0000cc);
             color: white;
         }
+        .btn-dislike:hover {
+            background: linear-gradient(to right, #0000cc, #0000ff);  /* ホバー時の背景 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);  /* ホバー時のシャドウ */
+            transform: translateY(-2px);  /* ホバー時の動き */
+        }
+        .btn-dislike.btn-inactive:hover {
+            background: linear-gradient(to right, #0000cc, #0000ff);  /* ホバー時の背景 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);  /* ホバー時のシャドウ */
+            transform: translateY(-2px);  /* ホバー時の動き */
+        }
         .btn-inactive {
-            background-color: gray;
+            background: linear-gradient(to right, #525356, #75787b);
             color: white;
+        }
+        .btn-inactive:hover {
+            background: linear-gradient(to right, #75787b, #525356);  /* ホバー時の背景 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);  /* ホバー時のシャドウ */
+            transform: translateY(-2px);  /* ホバー時の動き */
         }
         textarea {
             width: 100%;
@@ -165,12 +190,6 @@
             justify-content: center;
         }
 
-        #search-button:hover {
-            background: linear-gradient(to right, #75787b, #525356);  /* ホバー時の背景 */
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);  /* ホバー時のシャドウ */
-            transform: translateY(-2px);  /* ホバー時の動き */
-        }
-
         #search-button.red {
             background: linear-gradient(to right, #ff0000, #cc0000); /* 赤のグラデーション背景 */
             height: 30px;
@@ -197,6 +216,26 @@
 
         .leaflet-popup-close-button {
             font-size: 1px; /* 閉じるボタンのサイズを小さくする */
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: flex-start;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 10px;
+            border: none;
+            transition: all 0.3s ease;  /* トランジションを追加 */
+        }
+        .title {
+            font-size: 15.5px; /* タイトルのフォントサイズを大きくする */
+            font-weight: bold; /* タイトルを太字にする（必要なら） */
         }
 
                 /* モバイル表示用のスタイル */
@@ -379,10 +418,16 @@
             });
             var marker = L.marker([lat, lng], {icon: icon}).addTo(map);
             marker.bindPopup(`
-                <b>${title}</b><br>
-                <button class="btn btn-like ${status > 0 ? '' : 'btn-inactive'}" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
-                <button class="btn btn-dislike ${status < 0 ? '' : 'btn-inactive'}" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button><br>
-                <div id="desc-${lat}-${lng}" class="desc">${content}</div>
+                <div class="marker-popup">
+                    <div class="title">
+                        <b>${title}</b>
+                    </div>
+                    <div class="btn-container">
+                        <button class="btn btn-like ${status > 0 ? '' : 'btn-inactive'}" id="like-${lat}-${lng}" onclick="likeMarker(${lat}, ${lng})">Like</button>
+                        <button class="btn btn-dislike ${status < 0 ? '' : 'btn-inactive'}" id="dislike-${lat}-${lng}" onclick="dislikeMarker(${lat}, ${lng})">Dislike</button>
+                    </div>
+                    <div id="desc-${lat}-${lng}" class="desc">${content}</div>
+                </div>
             `);
             markers.push(marker);
             console.log('markers:', marker.getLatLng().lat, marker.options.icon.options.iconUrl);
