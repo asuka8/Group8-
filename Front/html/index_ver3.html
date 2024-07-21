@@ -266,7 +266,9 @@
         </select>
         <button onclick="filterAttractions()" class="general-button"><b>Apply Filter</b></button>
     </div>
-    <button id="search-button" onclick="toggleSearchBar()">Search</button>
+    <button id="search-button" onclick="toggleSearchBar()">Search<span class="material-icons" style="font-size: 17px;">
+        search
+        </span></button>
     <div id="search-bar">
         <label for="search-input"><b>Search:</b></label>
         <input type="text" id="search-input" placeholder="Enter location name">
@@ -328,7 +330,7 @@
             if (searchBar.classList.contains('show')) {
                 searchBar.classList.remove('show');
                 setTimeout(() => {
-                    searchButton.innerHTML = '<i class="fas fa-search"></i> Search'; // 元の文字に戻す
+                    searchButton.innerHTML = 'Search<span class="material-icons" style="font-size: 17px;">search</span>'; // 元の文字に戻す
                     searchButton.classList.remove('red');
                 }, 300); // トランジション時間に合わせて遅延
             } else {
