@@ -292,6 +292,9 @@
 
     <div id="map"></div>
     <div class="bottom-left-buttons">
+        <button id="return-to-location" class="general-button">current location</button>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="path/to/your/map-script.js"></script>
         <button id="logout-button" class="general-button"><b>Logout</b><span class="material-icons" style="margin-left: 8px;">
             logout
             </span></button>
@@ -306,6 +309,8 @@
     <div id="userprofile-data" data-userprofile='{{ userprofile|tojson|safe }}'></div>
     <div id="guides-data" data-guides='{{ guides|tojson|safe }}'></div>  <!-- New -->
     <div id="ld-data" data-like-dislike='{{ like_dislike|tojson|safe }}'></div> <!-- New -->
+    
+
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
@@ -564,6 +569,14 @@
             console.log('onLocationFound');
             filterAttractions();
         }
+//現在地に戻る
+        document.getElementById('return-to-location').addEventListener('click', function() {
+    if (userLocation) {
+        map.setView(userLocation, 16);
+    } else {
+        alert('現在地がまだ取得されていません。');
+    }
+});
 
         function onLocationError(e) {
             alert(e.message);
