@@ -3,9 +3,65 @@ from transformers import BertTokenizer, BertForSequenceClassification
 import torch
 import re
 import os
+import time
 
 api_key = 'your-api-key-here'
-openai.api_key = api_key
+
+class Agent:
+    def __init__(self, temperature=0.7, model='gpt-3.5-turbo', max_tokens=512, api_key = ""):
+        self.temperature = temperature
+        self.model = model
+        self.max_tokens = max_tokens
+        openai.api_key = api_key
+    
+    def communicate(self, context):
+        prompt = context
+        message = ""
+
+        retries = 3
+        backoff_factor = 2
+        current_retry = 0
+
+        while current_retry < retries:
+            try:
+                response = openai.ChatCompletion.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "user", "content": prompt},
+                    ],
+                    max_tokens=self.max_tokens,
+                    n=1,
+                    temperature=self.temperature,
+                    top_p=1
+                )
+                message = response['choices'][0]['message']['content'].strip()
+                return message
+            except openai.error.RateLimitError as e:
+                if current_retry < retries - 1:
+                    wait_time = backoff_factor ** current_retry
+                    print(f"RateLimitError: Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    current_retry += 1
+                else:
+                    print(f"Error {e}")
+                    raise e
+            except openai.error.APIError as e:
+                if current_retry < retries - 1:
+                    wait_time = backoff_factor ** current_retry
+                    print(f"RateLimitError: Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    current_retry += 1
+                else:
+                    raise e
+            except Exception as e:
+                if current_retry < retries - 1:
+                    wait_time = backoff_factor ** current_retry
+                    print(f"RateLimitError: Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    current_retry += 1
+                else:
+                    print(f"Error {e}")
+                    raise e
 
 def find_first_integer(s):
     match = re.search(r'\d+', s)
@@ -14,13 +70,9 @@ def find_first_integer(s):
     return None
 
 def classify_with_gpt3(text):
-    response = openai.Completion.create(
-        engine="gpt-3.5-turbo",
-        prompt=f"This is a spam classifier. Please determine whether the following text is spam or not, return 0 (not spam) or 1 (spam).\n\nText:{text}\n\nClassification:",
-        max_tokens=1,
-        temperature=0
-    )
-    return int(response.choices[0].text.strip())
+    agent = Agent(api_key=api_key)
+    response = agent.communicate(f"This is a spam classifier. Please determine whether the following text is spam or not, return 0 (not spam) or 1 (spam).\n\nText:{text}\n\nClassification:")
+    return response
 
 def check_folder_exists(folder_a, folder_b):
     folder_b_path = os.path.join(folder_a, folder_b)
