@@ -136,6 +136,8 @@ def user_page(user_id):
         return abort(404, description="User not found")
     
     guides = Guide.query.filter_by(user_id=user_id).all()
+    for guide in guides:
+        guide.like_num = Like_Dislike.query.filter_by(guide_id=guide.id, status=1).count()
     liked_dislikes = Like_Dislike.query.filter_by(user_id=user_id, status=1).all()
     liked_guide_ids = [ld.guide_id for ld in liked_dislikes]
     liked_guides = Guide.query.filter(Guide.id.in_(liked_guide_ids)).all()

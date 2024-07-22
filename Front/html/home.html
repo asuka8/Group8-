@@ -294,11 +294,19 @@
       .guide-title {
         font-size: 1.1rem; /* 文字サイズを調整 */
         font-weight: bold;
+        width: 70%; /* adjust as needed */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
-
 
       .guide-content {
         margin-top: 2px; /* 調整する余白の値 */
+      }
+
+      .guide-likes {
+        width: 30%; /* adjust as needed */
+        text-align: right;
       }
   
       /* Mobile対応スタイル */
@@ -327,6 +335,7 @@
             {% for guide in guides %}
               <li>
                 <span class="guide-title">{{ guide.title }}</span>
+                <span class="guide-likes">{{ guide.like_num }} likes</span>
                 <p class="guide-content">{{ guide.content }}</p>
               </li>
             {% endfor %}
