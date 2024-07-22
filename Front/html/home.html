@@ -306,7 +306,8 @@
 
       .guide-likes {
         width: 30%; /* adjust as needed */
-        text-align: right;
+        display: flex;
+        align-items: center;
       }
   
       /* Mobile対応スタイル */
@@ -335,7 +336,9 @@
             {% for guide in guides %}
               <li>
                 <span class="guide-title">{{ guide.title }}</span>
-                <span class="guide-likes">{{ guide.like_num }} likes</span>
+                <span class="guide-likes"><span class="material-icons" style="margin-right: 8px;">
+                  thumb_up_alt
+                  </span>{{ guide.like_num }} </span>
                 <p class="guide-content">{{ guide.content }}</p>
               </li>
             {% endfor %}
