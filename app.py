@@ -136,6 +136,9 @@ def user_page(user_id):
         return abort(404, description="User not found")
     
     guides = Guide.query.filter_by(user_id=user_id).all()
+    for guide in guides:
+        guide.like_num = Like_Dislike.query.filter_by(guide_id=guide.id, status=1).count()
+    guides = sorted(guides, key=lambda guide: guide.like_num, reverse=True)
     liked_dislikes = Like_Dislike.query.filter_by(user_id=user_id, status=1).all()
     liked_guide_ids = [ld.guide_id for ld in liked_dislikes]
     liked_guides = Guide.query.filter(Guide.id.in_(liked_guide_ids)).all()
@@ -488,6 +491,38 @@ def get_guides():
     if guides is None:
         return jsonify({'error': 'No guides found for this user'}), 404
     return jsonify([{'id': guide.id, 'user_id': guide.user_id, 'title': guide.title, 'content': guide.content, 'latitude': guide.latitude, 'longitude': guide.longitude} for guide in guides]), 200
+
+@app.route('/update_guide/<int:guide_id>', methods=['GET', 'POST'])
+def update_guide(guide_id):
+    guide = Guide.query.get_or_404(guide_id)
+    
+    if request.method == 'POST':
+        content = request.form.get('content')
+        if content:
+            guide.content = content
+            guide.updated_at = date.today()
+            try:
+                db.session.commit()
+                flash('Guide updated successfully!', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error updating guide: {str(e)}', 'error')
+        return redirect(url_for('user_page', user_id=guide.user_id))
+    
+    return render_template('update_guide.html', guide=guide)
+
+@app.route('/delete_guide/<int:guide_id>', methods=['POST'])
+def delete_guide(guide_id):
+    guide = Guide.query.get_or_404(guide_id)
+    user_id = guide.user_id
+    try:
+        db.session.delete(guide)
+        db.session.commit()
+        flash('Guide deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting guide: {str(e)}', 'error')
+    return redirect(url_for('user_page', user_id=user_id))
 
 @app.route('/get_userprofiles', methods=['GET'])
 def get_userprofiles():
