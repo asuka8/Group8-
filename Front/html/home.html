@@ -79,12 +79,12 @@
       });
 
       deleteButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const guideId = this.getAttribute('data-guide-id');
-          if (confirm('本当にこのガイドを削除しますか？')) {
-            console.log('Delete guide with ID:', guideId);
-            // ここで削除処理を実装
+        button.addEventListener('click', function(event) {
+          event.preventDefault();
+          if(confirm('本当にこのガイドを削除しますか？')){
+            this.closest('form').submit();
           }
+            // ここで削除処理を実装
         });
       });
     });
@@ -321,16 +321,11 @@
         margin: 0;
       }
       
-      .guide-title {
-        font-size: 1.1rem;
-        font-weight: bold;
-        margin-right: 10px;
-      }
-
       .guide-actions {
         display: flex;
         align-items: center;
       }
+
       .update-button,
       .delete-button {
         background: none;
@@ -365,6 +360,10 @@
       .guide-title {
         font-size: 1.1rem; /* 文字サイズを調整 */
         font-weight: bold;
+        width: 70%; /* adjust as needed */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .guide-content {
@@ -402,7 +401,24 @@
           <ul>
             {% for guide in guides %}
               <li>
-                <span class="guide-title">{{ guide.title }}</span>
+                <div class="guide-header">
+                  <div class="title-update-container">
+                    <span class="guide-title">{{ guide.title }}</span>
+                    <span class="guide-likes"><span class="material-icons" style="margin-right: 8px;">
+                      thumb_up_alt
+                    </span>{{guide.like_num}}</span>
+                    <div class="guide-actions">
+                      <a href="{{ url_for('update_guide', guide_id=guide.id) }}" class="update-button">
+                        <span class="material-icons">edit</span>
+                      </a>
+                      <form action="{{ url_for('delete_guide', guide_id=guide.id) }}" method="post" class="delete-form">
+                        <button type="submit" class="delete-button">
+                          <span class="material-icons">delete</span>
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
                 <p class="guide-content">{{ guide.content }}</p>
               </li>
             {% endfor %}
