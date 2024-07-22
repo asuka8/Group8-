@@ -287,6 +287,7 @@
         <button onclick="searchAttractions()" class="general-button"><span class="material-icons" style="font-size: 17px;">
             search
             </span></button>
+            <button id="voice-search-button"><span class="material-icons" style="font-size: 17px;">mic</span></button> 
         <ul id="search-results"></ul>
     </div>
 
@@ -405,6 +406,45 @@
                 }
             });
         }
+
+        document.getElementById('voice-search-button').addEventListener('click', function() {
+        if (!('webkitSpeechRecognition' in window)) {
+            alert("Your browser does not support Web Speech API");
+            return;
+        }
+        var recognition = new webkitSpeechRecognition();
+        var userLanguage = "{{ userprofile.language }}";
+        switch(userLanguage) {
+                case 'ja':
+                    recognition.lang = 'ja-JP'; // 日本語
+                    break;
+                case 'en':
+                    recognition.lang = 'en-US'; // 英語
+                    break;
+                case 'zh':
+                    recognition.lang = 'zh-CN'; // 中国語
+                    break;
+                default:
+                    recognition.lang = 'en-US'; // デフォルトは英語
+            }
+
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onresult = function(event) {
+            var transcript = event.results[0][0].transcript;
+            transcript = transcript.replace(/[。．、,]/g, '');
+
+            document.getElementById('search-input').value = transcript;
+            searchAttractions();
+        };
+
+        recognition.onerror = function(event) {
+            console.error('Speech recognition error:', event.error);
+        };
+
+        recognition.start();
+    });
 
         var map = L.map('map').setView([35.0262444, 135.7808218], 15);
         var userLocation = null;
