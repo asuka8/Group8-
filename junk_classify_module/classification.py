@@ -82,30 +82,29 @@ def check_folder_exists(folder_a, folder_b):
     else: return False
 
 def classify_message(text, model_path='./junk_classify_module/bert_model', tokenizer_path='./junk_classify_module/bert_tokenizer'):
-    if check_folder_exists("./junk_classify_module/", "bert_model") == False:
-        from junk_classify_module.data_processing import load_data, split_data
-        from junk_classify_module.model_training import train_model, save_model
-        df = load_data('./junk_classify_module/data.json')
-        train_texts, val_texts, train_labels, val_labels = split_data(df)
-        model, tokenizer = train_model(train_texts, train_labels, val_texts, val_labels)
-        save_model(model, tokenizer)
-    
-    text = text.strip('!@#$%^&*()_+-=[]{}|;:\'",.<>?/`~')
+    if api_key == 'your-api-key-here': # BERT
+        if check_folder_exists("./junk_classify_module/", "bert_model") == False:
+            from junk_classify_module.data_processing import load_data, split_data
+            from junk_classify_module.model_training import train_model, save_model
+            df = load_data('./junk_classify_module/data.json')
+            train_texts, val_texts, train_labels, val_labels = split_data(df)
+            model, tokenizer = train_model(train_texts, train_labels, val_texts, val_labels)
+            save_model(model, tokenizer)
+        
+        text = text.strip('!@#$%^&*()_+-=[]{}|;:\'",.<>?/`~')
 
-    from junk_classify_module.model_training import load_model
-    model, tokenizer = load_model(model_path, tokenizer_path)
+        from junk_classify_module.model_training import load_model
+        model, tokenizer = load_model(model_path, tokenizer_path)
+        
+        inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+        outputs = model(**inputs)
+        
+        predictions = torch.argmax(outputs.logits, dim=-1).item()
     
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
-    outputs = model(**inputs)
-
-    if api_key == 'your-api-key-here':
-        predictions = torch.argmax(outputs.logits, dim=-1).item() # BERT
-    
-    else:
-        predictions = classify_with_gpt3(text) # GPT
+    else: # GPT
+        predictions = classify_with_gpt3(text)
         
     if isinstance(predictions, str): predictions = find_first_integer(predictions)
-    print(predictions)
     return round(predictions)
 
 if __name__ == "__main__":
