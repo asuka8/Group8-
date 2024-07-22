@@ -664,7 +664,7 @@ def reco():
     user = User.query.filter_by(id=user_id).first()
     user_description = user.userprofile.bio
     print(user_description)
-    print(type(user_description))
+    #print(type(user_description))
     like_dislike_records = user.like_dislike
     print(like_dislike_records)
 
@@ -694,8 +694,9 @@ def reco():
 
     # 推薦された観光地をユーザーごとのリストに保存
     recommended_spots_by_user[user_id] = recommended_spots
+    recommended_spots_filtered = [{k: v for k, v in spot.items() if k not in ['description', 'lat', 'lng']} for spot in recommended_spots]
 
-    print('おすすめスポット:',recommended_spots)
+    print('おすすめスポット:', recommended_spots_filtered)
 
     return jsonify({'message': 'User logged in and recommendations calculated', 'recommended_spots': recommended_spots})
 
