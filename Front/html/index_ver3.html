@@ -190,11 +190,23 @@
             justify-content: center;
         }
 
+        #search-button:hover {
+            background: linear-gradient(to right, #75787b, #525356);  /* ホバー時の背景 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);  /* ホバー時のシャドウ */
+            transform: translateY(-2px);  /* ホバー時の動き */
+        }
+
         #search-button.red {
             background: linear-gradient(to right, #ff0000, #cc0000); /* 赤のグラデーション背景 */
             height: 30px;
             width: 30px; /* バツマークに変わるときの幅を調整 */
             font-size: 15px;
+        }
+
+        #search-button.red:hover {
+            background: linear-gradient(to right, #cc0000, #ff0000);  /* ホバー時の背景 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);  /* ホバー時のシャドウ */
+            transform: translateY(-2px);  /* ホバー時の動き */
         }
 
         .leaflet-popup-content-wrapper {
