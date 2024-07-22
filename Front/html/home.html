@@ -365,14 +365,6 @@
       .guide-title {
         font-size: 1.1rem; /* 文字サイズを調整 */
         font-weight: bold;
-<<<<<<< HEAD
-        margin-right: 10px;
-=======
-        width: 70%; /* adjust as needed */
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
->>>>>>> 09fda78b43c9da5d9bf58a4b517b40497bac7b33
       }
 
       .guide-content {
@@ -410,21 +402,7 @@
           <ul>
             {% for guide in guides %}
               <li>
-                <div class="guide-header">
-                  <div class="title-update-container">
-                    <span class="guide-title">{{ guide.title }}</span>
-                    <div class="guide-actions">
-                      <a href="{{ url_for('update_guide', guide_id=guide.id) }}" class="update-button">
-                        <span class="material-icons">edit</span>
-                      </a>
-                      <form action="{{ url_for('delete_guide', guide_id=guide.id) }}" method="post" class="delete-form">
-                        <button type="submit" class="delete-button">
-                          <span class="material-icons">delete</span>
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
+                <span class="guide-title">{{ guide.title }}</span>
                 <p class="guide-content">{{ guide.content }}</p>
               </li>
             {% endfor %}
