@@ -5,7 +5,7 @@ import re
 import os
 import time
 
-api_key = 'sk-proj-iVLzb4XmpgjatOIsfjCUT3BlbkFJWu6FAh5ZMJA0Drfs8Rth'
+api_key = 'your-api-key-here'
 
 class Agent:
     def __init__(self, temperature=0.7, model='gpt-4o', max_tokens=512, api_key = ""):
