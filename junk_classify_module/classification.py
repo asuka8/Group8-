@@ -5,7 +5,7 @@ import re
 import os
 import time
 
-api_key = 'your-api-key-here'
+api_key = 'sk-proj-iVLzb4XmpgjatOIsfjCUT3BlbkFJWu6FAh5ZMJA0Drfs8Rth'
 
 class Agent:
     def __init__(self, temperature=0.7, model='gpt-4o', max_tokens=512, api_key = ""):
@@ -71,7 +71,7 @@ def find_first_integer(s):
 
 def classify_with_gpt3(text):
     agent = Agent(api_key=api_key)
-    response = agent.communicate(f"This is a spam classifier. Please determine whether the following text is spam or not, return 0 (not spam) or 1 (spam). Note that irrelevant information is also considered as spam, e.g., あああ\n\nText:{text}\n\nClassification:")
+    response = agent.communicate(f"This is a spam classifier. Please determine whether the following text is spam or not, return 0 (not spam) or 1 (spam). Note that information without clear meaning or advertisement is also considered as spam, e.g., あああ and 大特価セール中！今すぐクリックしてお得な情報をチェックしてください！ are spam\n\nText:{text}\n\nYour classification:")
     return response
 
 def check_folder_exists(folder_a, folder_b):
