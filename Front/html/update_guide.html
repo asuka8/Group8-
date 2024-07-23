@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <title>Update Guide</title>
+  <style>
+    html {
+      font-size: 16px;
+    }
+
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(to bottom right, rgba(138, 43, 226, 0.3), rgba(75, 0, 130, 0.6));
+      padding: 20px;
+    }
+
+    .update-form {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .guide-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #444;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      resize: vertical;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      background: linear-gradient(to right, #525356, #75787b);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #75787b, #525356);
+      transform: translateY(-2px);
+    }
+
+    .material-icons {
+      margin-left: 8px;
+    }
+
+    .back-link {
+      margin-top: 20px;
+      text-decoration: none;
+      color: #333;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="update-form">
+      <h1>Update Guide</h1>
+      <div class="guide-title">{{ guide.title }}</div>
+      <form action="{{ url_for('update_guide', guide_id=guide.id) }}" method="post">
+        <textarea name="content" required>{{ guide.content }}</textarea>
+        <button type="submit">
+          Update
+          <span class="material-icons">save</span>
+        </button>
+      </form>
+      <a href="{{ url_for('user_page', user_id=guide.user_id) }}" class="back-link">
+        <span class="material-icons">arrow_back</span>
+        Back to Profile
+      </a>
+    </div>
+  </div>
+</body>
+</html>

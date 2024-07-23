@@ -492,6 +492,38 @@ def get_guides():
         return jsonify({'error': 'No guides found for this user'}), 404
     return jsonify([{'id': guide.id, 'user_id': guide.user_id, 'title': guide.title, 'content': guide.content, 'latitude': guide.latitude, 'longitude': guide.longitude} for guide in guides]), 200
 
+@app.route('/update_guide/<int:guide_id>', methods=['GET', 'POST'])
+def update_guide(guide_id):
+    guide = Guide.query.get_or_404(guide_id)
+    
+    if request.method == 'POST':
+        content = request.form.get('content')
+        if content:
+            guide.content = content
+            guide.updated_at = date.today()
+            try:
+                db.session.commit()
+                flash('Guide updated successfully!', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error updating guide: {str(e)}', 'error')
+        return redirect(url_for('user_page', user_id=guide.user_id))
+    
+    return render_template('update_guide.html', guide=guide)
+
+@app.route('/delete_guide/<int:guide_id>', methods=['POST'])
+def delete_guide(guide_id):
+    guide = Guide.query.get_or_404(guide_id)
+    user_id = guide.user_id
+    try:
+        db.session.delete(guide)
+        db.session.commit()
+        flash('Guide deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting guide: {str(e)}', 'error')
+    return redirect(url_for('user_page', user_id=user_id))
+
 @app.route('/get_userprofiles', methods=['GET'])
 def get_userprofiles():
     userprofiles = UserProfile.query.all()
@@ -632,7 +664,7 @@ def reco():
     user = User.query.filter_by(id=user_id).first()
     user_description = user.userprofile.bio
     print(user_description)
-    print(type(user_description))
+    #print(type(user_description))
     like_dislike_records = user.like_dislike
     print(like_dislike_records)
 
@@ -662,8 +694,9 @@ def reco():
 
     # 推薦された観光地をユーザーごとのリストに保存
     recommended_spots_by_user[user_id] = recommended_spots
+    recommended_spots_filtered = [{k: v for k, v in spot.items() if k not in ['description', 'lat', 'lng']} for spot in recommended_spots]
 
-    print('おすすめスポット:',recommended_spots)
+    print('おすすめスポット:', recommended_spots_filtered)
 
     return jsonify({'message': 'User logged in and recommendations calculated', 'recommended_spots': recommended_spots})
 

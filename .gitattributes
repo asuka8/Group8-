@@ -1,0 +1,2 @@
+results/checkpoint-30/model.safetensors filter=lfs diff=lfs merge=lfs -text
+results/checkpoint-30/optimizer.pt filter=lfs diff=lfs merge=lfs -text

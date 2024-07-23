@@ -66,6 +66,29 @@
         profileEditForm.classList.add('hidden');
       });
     });
+    document.addEventListener('DOMContentLoaded', function() {
+      const updateButtons = document.querySelectorAll('.update-button');
+      const deleteButtons = document.querySelectorAll('.delete-button');
+      
+      updateButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const guideId = this.getAttribute('data-guide-id');
+          console.log('Update guide with ID:', guideId);
+          // ここで更新処理を実装
+        });
+      });
+
+      deleteButtons.forEach(button => {
+        button.addEventListener('click', function(event) {
+          event.preventDefault();
+          if(confirm('本当にこのガイドを削除しますか？')){
+            this.closest('form').submit();
+          }
+            // ここで削除処理を実装
+        });
+      });
+    });
+
   </script>
     <style>
       /* ルート要素に基本のフォントサイズを設定 */
@@ -282,6 +305,55 @@
         margin-top: 20px; /* 見出しとの間にマージンを追加 */
       }
 
+      .guide-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      .title-update-container {
+        display: flex;
+        align-items: center;
+        flex-grow: 1;
+        justify-content: space-between;
+      }
+
+      .delete-form {
+        margin: 0;
+      }
+      
+      .guide-actions {
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+      }
+
+      .update-button,
+      .delete-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        color: #525356;
+        transition: color 0.3s ease;
+        margin: 0 2px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+
+      }
+
+      .update-button:hover,
+      .delete-button:hover {
+        color: #75787b;
+      }
+
+      .update-button .material-icons,
+      .delete-button .material-icons {
+        font-size: 18px;
+      }
+
       #display-language {
         display: inline-block;
         white-space: nowrap;
@@ -294,10 +366,10 @@
       .guide-title {
         font-size: 1.1rem; /* 文字サイズを調整 */
         font-weight: bold;
-        width: 70%; /* adjust as needed */
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        margin-right: 10px;
       }
 
       .guide-content {
@@ -305,9 +377,9 @@
       }
 
       .guide-likes {
-        width: 30%; /* adjust as needed */
         display: flex;
         align-items: center;
+        white-space: nowrap;
       }
   
       /* Mobile対応スタイル */
@@ -335,10 +407,26 @@
           <ul>
             {% for guide in guides %}
               <li>
-                <span class="guide-title">{{ guide.title }}</span>
-                <span class="guide-likes"><span class="material-icons" style="margin-right: 8px;">
-                  thumb_up_alt
-                  </span>{{ guide.like_num }} </span>
+                <div class="guide-header">
+                  <div class="title-update-container">
+                    <span class="guide-title">{{ guide.title }}</span>
+                    <span class="guide-likes"><span class="material-icons" style="margin-right: 8px;">
+                      thumb_up_alt
+                    </span>{{guide.like_num}}</span>
+                    <div class="guide-actions">
+                      <form action="{{ url_for('update_guide', guide_id=guide.id) }}" method="get" class="update-form">
+                        <button type="submit" class="update-button">
+                          <span class="material-icons">edit</span>
+                        </button>
+                      </form>
+                      <form action="{{ url_for('delete_guide', guide_id=guide.id) }}" method="post" class="delete-form">
+                        <button type="submit" class="delete-button">
+                          <span class="material-icons">delete</span>
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
                 <p class="guide-content">{{ guide.content }}</p>
               </li>
             {% endfor %}
