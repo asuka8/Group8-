@@ -71,7 +71,7 @@ def find_first_integer(s):
 
 def classify_with_gpt3(text):
     agent = Agent(api_key=api_key)
-    response = agent.communicate(f"This is a spam classifier. Please determine whether the following text is spam or not, return 0 (not spam) or 1 (spam).\n\nText:{text}\n\nClassification:")
+    response = agent.communicate(f"This is a spam classifier. Please determine whether the following text is spam or not, return 0 (not spam) or 1 (spam). Note that irrelevant information is also considered as spam, e.g., あああ\n\nText:{text}\n\nClassification:")
     return response
 
 def check_folder_exists(folder_a, folder_b):
