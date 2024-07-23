@@ -247,10 +247,10 @@ def add_marker(user_id):
     location_name = data.get('location_name')
     description = data.get('description', '')
 
-    '''if description:
+    if description:
         from junk_classify_module import classification
         if classification.classify_message(description) == 1:
-            return abort(400, description="Junk content")'''
+            return abort(400, description="Junk content")
     
     if lat is not None and lng is not None and location_name and user:
         #marker = {'lat': lat, 'lng': lng, 'location_name': location_name, 'description': description, 'likes': 0, 'dislikes': 0}
