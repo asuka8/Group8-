@@ -8,7 +8,7 @@ import time
 api_key = 'your-api-key-here'
 
 class Agent:
-    def __init__(self, temperature=0.7, model='gpt-3.5-turbo', max_tokens=512, api_key = ""):
+    def __init__(self, temperature=0.7, model='gpt-4o', max_tokens=512, api_key = ""):
         self.temperature = temperature
         self.model = model
         self.max_tokens = max_tokens
