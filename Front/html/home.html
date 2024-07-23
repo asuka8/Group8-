@@ -309,12 +309,14 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        width: 100%;
       }
 
       .title-update-container {
         display: flex;
         align-items: center;
         flex-grow: 1;
+        justify-content: space-between;
       }
 
       .delete-form {
@@ -324,6 +326,7 @@
       .guide-actions {
         display: flex;
         align-items: center;
+        margin-left: auto;
       }
 
       .update-button,
@@ -336,6 +339,9 @@
         align-items: center;
         color: #525356;
         transition: color 0.3s ease;
+        margin: 0 2px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+
       }
 
       .update-button:hover,
@@ -360,10 +366,10 @@
       .guide-title {
         font-size: 1.1rem; /* 文字サイズを調整 */
         font-weight: bold;
-        width: 70%; /* adjust as needed */
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        margin-right: 10px;
       }
 
       .guide-content {
@@ -371,9 +377,9 @@
       }
 
       .guide-likes {
-        width: 30%; /* adjust as needed */
         display: flex;
         align-items: center;
+        white-space: nowrap;
       }
   
       /* Mobile対応スタイル */
@@ -408,9 +414,11 @@
                       thumb_up_alt
                     </span>{{guide.like_num}}</span>
                     <div class="guide-actions">
-                      <a href="{{ url_for('update_guide', guide_id=guide.id) }}" class="update-button">
-                        <span class="material-icons">edit</span>
-                      </a>
+                      <form action="{{ url_for('update_guide', guide_id=guide.id) }}" method="get" class="update-form">
+                        <button type="submit" class="update-button">
+                          <span class="material-icons">edit</span>
+                        </button>
+                      </form>
                       <form action="{{ url_for('delete_guide', guide_id=guide.id) }}" method="post" class="delete-form">
                         <button type="submit" class="delete-button">
                           <span class="material-icons">delete</span>
